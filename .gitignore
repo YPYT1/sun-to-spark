@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+vitest.config.js
+vitest.config.d.ts
+
+# local / tooling
+.playwright-mcp/
+artifacts/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
