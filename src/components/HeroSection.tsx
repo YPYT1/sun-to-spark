@@ -47,9 +47,8 @@ export function HeroSection({ onPreset }: HeroSectionProps) {
           <span className="live-dot" /> 人生时间账单 · Life Time Bill
         </motion.div>
         <h1>
-          <BlurText text="出卖给工作的时间，" />
-          <br />
-          <BlurText text="究竟偷走了你多少人生？" />
+          <span className="hero-line"><BlurText text="出卖给工作的时间，" /></span>
+          <span className="hero-line"><BlurText text="究竟偷走了你多少人生？" /></span>
         </h1>
         <motion.p initial={{ opacity: 0, filter: 'blur(8px)', y: 14 }} animate={{ opacity: 1, filter: 'blur(0)', y: 0 }} transition={{ delay: 1.15, duration: 0.8 }}>
           把上下班、调休、通勤与睡眠放进同一张账单。<br className="hidden sm:block" />看看退休之前，真正属于你的时间还剩多少。
