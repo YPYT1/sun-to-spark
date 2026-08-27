@@ -1,5 +1,5 @@
 import { toPng } from 'html-to-image'
-import { Download, X } from 'lucide-react'
+import { Check, Download, Link2, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { formatFull } from '../lib/algorithm'
 import type { BillResult, LifeConfig } from '../types'
@@ -14,6 +14,7 @@ interface PosterModalProps {
 export function PosterModal({ open, onClose, config, result }: PosterModalProps) {
   const posterRef = useRef<HTMLDivElement>(null)
   const [exporting, setExporting] = useState(false)
+  const [copied, setCopied] = useState(false)
   if (!open) return null
 
   const download = async () => {
@@ -28,6 +29,12 @@ export function PosterModal({ open, onClose, config, result }: PosterModalProps)
     } finally {
       setExporting(false)
     }
+  }
+
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1800)
   }
 
   return (
@@ -48,7 +55,10 @@ export function PosterModal({ open, onClose, config, result }: PosterModalProps)
             <footer><span>时间不是拥有的东西，<br />时间就是你的人生。</span><span className="poster-code">L T B<br />2 0 2 6</span></footer>
           </div>
         </div>
-        <button className="download-poster" onClick={download} disabled={exporting}><Download size={18} /> {exporting ? '正在生成…' : '下载高清账单'}</button>
+        <div className="poster-actions">
+          <button className="download-poster" onClick={download} disabled={exporting}><Download size={18} /> {exporting ? '正在生成…' : '下载高清账单'}</button>
+          <button className="copy-poster-link" onClick={copyLink}>{copied ? <Check size={16} /> : <Link2 size={16} />}{copied ? '链接已复制' : '复制账单链接'}</button>
+        </div>
       </div>
     </div>
   )

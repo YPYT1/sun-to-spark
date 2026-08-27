@@ -1,4 +1,4 @@
-import { ChevronDown, RotateCcw } from 'lucide-react'
+import { ChevronDown, History, RotateCcw } from 'lucide-react'
 import { motion } from 'motion/react'
 import { HOLIDAYS } from '../lib/constants'
 import type { HolidayKey, LifeConfig } from '../types'
@@ -8,6 +8,8 @@ interface ControlSectionProps {
   onChange: (patch: Partial<LifeConfig>) => void
   onHolidayChange: (key: HolidayKey, value: number) => void
   onReset: () => void
+  onRestore: () => void
+  canRestore: boolean
 }
 
 interface RangeFieldProps {
@@ -41,7 +43,7 @@ function Segmented<T extends string>({ value, options, onChange, label }: { valu
   )
 }
 
-export function ControlSection({ config, onChange, onHolidayChange, onReset }: ControlSectionProps) {
+export function ControlSection({ config, onChange, onHolidayChange, onReset, onRestore, canRestore }: ControlSectionProps) {
   return (
     <section className="section calculator-section" id="calculator">
       <motion.div className="section-intro" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }}>
@@ -54,7 +56,13 @@ export function ControlSection({ config, onChange, onHolidayChange, onReset }: C
       </motion.div>
 
       <motion.div className="control-console liquid-glass-strong" initial={{ opacity: 0, y: 34 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }}>
-        <div className="console-head"><div><span>PROFILE</span><h3>人生坐标</h3></div><button className="icon-button" onClick={onReset} title="恢复默认值"><RotateCcw size={17} /></button></div>
+        <div className="console-head">
+          <div><span>PROFILE</span><h3>人生坐标</h3></div>
+          <div className="console-actions">
+            <button className="icon-button" onClick={onRestore} title="恢复上次账单" disabled={!canRestore}><History size={17} /></button>
+            <button className="icon-button" onClick={onReset} title="恢复默认值"><RotateCcw size={17} /></button>
+          </div>
+        </div>
         <div className="field-grid three">
           <RangeField label="当前年龄" value={config.currentAge} min={16} max={75} suffix="岁" onChange={(currentAge) => onChange({ currentAge, retireAge: Math.max(config.retireAge, currentAge + 1) })} />
           <RangeField label="退休年龄" value={config.retireAge} min={Math.max(40, config.currentAge + 1)} max={75} suffix="岁" onChange={(retireAge) => onChange({ retireAge, lifeExpectancy: Math.max(config.lifeExpectancy, retireAge) })} />

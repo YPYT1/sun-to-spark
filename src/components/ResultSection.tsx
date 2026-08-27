@@ -1,8 +1,10 @@
-import { ArrowUpRight, Download, Link2 } from 'lucide-react'
+import { ArrowUpRight, Check, Download, Link2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { formatFull } from '../lib/algorithm'
-import type { BillResult, TimeUnits } from '../types'
+import { buildInsights } from '../lib/insights'
+import { CompareStrip } from './CompareStrip'
+import type { BillResult, LifeConfig, TimeUnits } from '../types'
 
 type Granularity = 'FULL' | 'MONTH' | 'DAY'
 
@@ -13,16 +15,21 @@ function formatByGranularity(units: TimeUnits, granularity: Granularity) {
 }
 
 interface ResultSectionProps {
+  config: LifeConfig
   result: BillResult
-  retireAge: number
-  lifeExpectancy: number
+  onApplyPreset: (values: Partial<LifeConfig>) => void
   onPoster: () => void
 }
 
-export function ResultSection({ result, retireAge, lifeExpectancy, onPoster }: ResultSectionProps) {
+export function ResultSection({ config, result, onApplyPreset, onPoster }: ResultSectionProps) {
   const [granularity, setGranularity] = useState<Granularity>('FULL')
+  const [copied, setCopied] = useState(false)
+  const insights = buildInsights(result)
+
   const copyLink = async () => {
     await navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1800)
   }
 
   return (
@@ -38,15 +45,15 @@ export function ResultSection({ result, retireAge, lifeExpectancy, onPoster }: R
           <div className="bill-topline"><span>LIFE TIME BILL / 2026</span><div className="granularity-tabs">{([['FULL', '年月日'], ['MONTH', '月'], ['DAY', '日']] as const).map(([value, label]) => <button className={granularity === value ? 'active' : ''} onClick={() => setGranularity(value)} key={value}>{label}</button>)}</div></div>
 
           <div className="bill-primary">
-            <p>到您 <strong>{retireAge}</strong> 岁退休，累计被工作占用的时间是</p>
+            <p>到您 <strong>{config.retireAge}</strong> 岁退休，累计被工作占用的时间是</p>
             <motion.h3 key={`work-${granularity}-${result.workBill.totalHours}`} initial={{ opacity: 0.35, y: 8 }} animate={{ opacity: 1, y: 0 }}>{formatByGranularity(result.workBill, granularity)}</motion.h3>
-            <span>共 {result.workBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.workPercentage.toFixed(1)}% · 包含工作日内的休息时间</span>
+            <span>共 {result.workBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.workPercentage.toFixed(1)}% · 按上班到下班的完整在岗时间统计</span>
           </div>
 
           <div className="bill-separator"><span>VS</span></div>
 
           <div className="bill-primary free">
-            <p>从现在到预期 <strong>{lifeExpectancy}</strong> 岁，真正自由支配的时间是</p>
+            <p>从现在到预期 <strong>{config.lifeExpectancy}</strong> 岁，真正自由支配的时间是</p>
             <motion.h3 key={`free-${granularity}-${result.freeBill.totalHours}`} initial={{ opacity: 0.35, y: 8 }} animate={{ opacity: 1, y: 0 }}>{formatByGranularity(result.freeBill, granularity)}</motion.h3>
             <span>共 {result.freeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.freePercentage.toFixed(1)}% · 含退休后 {formatFull(result.postRetirementFreeBill)}</span>
           </div>
@@ -64,11 +71,32 @@ export function ResultSection({ result, retireAge, lifeExpectancy, onPoster }: R
             </div>
           </div>
 
+          <p className="bill-footnote">
+            分母是「现在 → 预期寿命」的全部剩余人生；工作按在岗跨度计入（含午休）；自由 = 退休前空闲 + 退休后扣睡眠/杂务后的时间。
+          </p>
+
+          <div className="insight-lines">
+            {insights.map((line) => (
+              <div className="insight-line" key={line.label}>
+                <span>{line.label}</span>
+                <strong>{line.value}</strong>
+                <small>{line.note}</small>
+              </div>
+            ))}
+          </div>
+
           <div className="bill-actions">
             <button className="glass-button" onClick={onPoster}><Download size={17} /> 生成人生账单卡片 <ArrowUpRight size={16} /></button>
-            <button className="text-button" onClick={copyLink}><Link2 size={16} /> 复制这份账单链接</button>
+            <button className="text-button" onClick={copyLink}>
+              {copied ? <Check size={16} /> : <Link2 size={16} />}
+              {copied ? '链接已复制' : '复制这份账单链接'}
+            </button>
           </div>
         </motion.div>
+      </div>
+
+      <div className="section">
+        <CompareStrip config={config} result={result} onApply={onApplyPreset} />
       </div>
 
       <div className="section insight-grid" id="method">

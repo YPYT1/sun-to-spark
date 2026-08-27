@@ -107,6 +107,8 @@ a { color: inherit; text-decoration: none; }
 .console-head h3 { margin: 5px 0 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 25px; font-style: italic; font-weight: 400; }
 .icon-button { display: grid; width: 36px; height: 36px; cursor: pointer; place-items: center; border: 1px solid rgba(255,255,255,.1); border-radius: 50%; background: rgba(255,255,255,.03); transition: .25s ease; }
 .icon-button:hover { background: #fff; color: #050505; }
+.icon-button:disabled { cursor: not-allowed; opacity: .35; }
+.console-actions { display: flex; gap: 8px; }
 .field-grid { position: relative; z-index: 5; display: grid; gap: 24px; }
 .field-grid.three { grid-template-columns: repeat(3, 1fr); }
 .range-field { display: block; min-width: 0; }
@@ -177,6 +179,29 @@ input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; appearanc
 .composition-legend i { width: 5px; height: 5px; border-radius: 50%; }
 .composition-legend b { color: rgba(255,255,255,.72); font-weight: 500; }
 .bill-actions { position: relative; z-index: 5; display: flex; align-items: center; gap: 24px; margin-top: 40px; }
+.bill-footnote { position: relative; z-index: 5; max-width: 720px; margin: 28px 0 0; color: rgba(255,255,255,.42); font-size: 12px; font-weight: 300; line-height: 1.7; }
+.insight-lines { position: relative; z-index: 5; display: grid; gap: 14px; margin-top: 34px; padding-top: 28px; border-top: 1px solid rgba(255,255,255,.08); }
+.insight-line { display: grid; gap: 4px; }
+.insight-line span { color: rgba(255,255,255,.42); font-size: 11px; letter-spacing: .08em; }
+.insight-line strong { font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(1.55rem, 2.4vw, 2.1rem); font-style: italic; font-weight: 400; letter-spacing: -.03em; }
+.insight-line small { color: rgba(255,255,255,.34); font-size: 11px; font-weight: 300; line-height: 1.55; }
+.compare-strip { margin: 18px 0 70px; padding: 28px 0 8px; border-top: 1px solid rgba(255,255,255,.08); }
+.compare-head span { display: block; color: rgba(255,255,255,.42); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.compare-head p { margin: 10px 0 22px; color: rgba(255,255,255,.58); font-size: 14px; font-weight: 300; }
+.compare-rows { display: grid; gap: 10px; }
+.compare-row { display: grid; grid-template-columns: minmax(0, 1.4fr) auto minmax(140px, .9fr); gap: 16px; align-items: center; width: 100%; padding: 16px 18px; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; background: rgba(255,255,255,.025); color: inherit; text-align: left; cursor: pointer; transition: .25s ease; }
+.compare-row:hover { border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05); transform: translateY(-1px); }
+.compare-row.current { border-color: rgba(216, 255, 102, .45); background: rgba(216, 255, 102, .08); }
+.compare-name { display: grid; gap: 4px; min-width: 0; }
+.compare-name b { font-size: 15px; font-weight: 500; }
+.compare-name small { color: rgba(255,255,255,.42); font-size: 12px; font-weight: 300; }
+.compare-stats { display: grid; justify-items: end; gap: 2px; }
+.compare-stats strong { font-family: 'Instrument Serif', Georgia, serif; font-size: 1.55rem; font-style: italic; font-weight: 400; }
+.compare-stats em { color: rgba(255,255,255,.4); font-size: 10px; font-style: normal; letter-spacing: .08em; }
+.compare-delta { color: rgba(255,255,255,.55); font-size: 12px; font-weight: 300; text-align: right; }
+.update-toast { position: fixed; right: 22px; bottom: 24px; z-index: 60; display: inline-flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 999px; color: #fff; text-decoration: none; box-shadow: 0 18px 50px rgba(0,0,0,.35); }
+.update-toast span { color: rgba(255,255,255,.62); font-size: 12px; }
+.update-toast strong { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
 .glass-button, .closing-button { display: inline-flex; cursor: pointer; align-items: center; gap: 9px; border: 0; border-radius: 999px; padding: 14px 18px; color: #050505; background: var(--paper); font-size: 12px; font-weight: 600; transition: .25s ease; }
 .glass-button:hover, .closing-button:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(255,255,255,.14); }
 .text-button { display: inline-flex; cursor: pointer; align-items: center; gap: 8px; border: 0; padding: 10px 0; color: rgba(255,255,255,.52); background: transparent; font-size: 11px; }
@@ -225,8 +250,10 @@ input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; appearanc
 .poster-meta { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.5); font-size: 8px; }
 .poster footer { position: absolute; right: 38px; bottom: 34px; left: 38px; display: flex; align-items: end; justify-content: space-between; color: rgba(255,255,255,.45); font-family: 'Instrument Serif', Georgia, serif; font-size: 14px; font-style: italic; line-height: 1.15; }
 .poster-code { color: rgba(255,255,255,.22); font-family: 'Barlow', sans-serif; font-size: 7px; font-style: normal; letter-spacing: .35em; text-align: right; }
+.poster-actions { display: grid; gap: 0; }
 .download-poster { display: flex; flex: 0 0 auto; cursor: pointer; align-items: center; justify-content: center; gap: 9px; border: 0; padding: 16px; color: #050505; background: #fff; font-size: 12px; font-weight: 600; }
 .download-poster:disabled { opacity: .55; }
+.copy-poster-link { display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-top: 1px solid rgba(255,255,255,.08); padding: 14px; color: rgba(255,255,255,.72); background: rgba(255,255,255,.04); font-size: 12px; cursor: pointer; }
 
 @media (max-width: 900px) {
   .nav-shell { width: calc(100% - 30px); grid-template-columns: 1fr auto; }
@@ -265,6 +292,9 @@ input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; appearanc
   .bill-primary h3 { font-size: 3.4rem; }
   .composition-legend { gap: 12px; }
   .bill-actions { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .compare-row { grid-template-columns: 1fr; gap: 8px; }
+  .compare-stats, .compare-delta { justify-items: start; text-align: left; }
+  .update-toast { right: 14px; left: 14px; bottom: 16px; justify-content: space-between; }
   .insight-grid { grid-template-columns: 1fr; padding-bottom: 110px; }
   .insight-grid article, .insight-grid article:first-child { border-top: 1px solid rgba(255,255,255,.1); border-left: 0; padding: 28px 0; }
   .insight-grid article:first-child { border-top: 0; }
