@@ -1,4 +1,4 @@
-export type WeekendType = 'DOUBLE' | 'BIG_SMALL' | 'SINGLE' | 'NONE'
+export type WeekendType = 'TRIPLE' | 'DOUBLE' | 'BIG_SMALL' | 'SINGLE' | 'NONE'
 export type HolidayMode = 'STANDARD' | 'CUSTOM'
 export type HolidayKey = 'newYear' | 'spring' | 'qingming' | 'labor' | 'dragonBoat' | 'midAutumn' | 'national'
 

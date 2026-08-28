@@ -1,4 +1,14 @@
-import type { HolidayKey, LifeConfig } from '../types'
+import type { HolidayKey, LifeConfig, WeekendType } from '../types'
+
+export const WEEKEND_TYPES: WeekendType[] = ['TRIPLE', 'DOUBLE', 'BIG_SMALL', 'SINGLE', 'NONE']
+
+export const WEEKEND_OPTIONS: Array<{ value: WeekendType; label: string }> = [
+  { value: 'TRIPLE', label: '三休' },
+  { value: 'DOUBLE', label: '双休' },
+  { value: 'BIG_SMALL', label: '大小休' },
+  { value: 'SINGLE', label: '单休' },
+  { value: 'NONE', label: '无休' },
+]
 
 export const HOLIDAYS: Array<{ key: HolidayKey; name: string; legalDays: number; displayDays: number }> = [
   { key: 'newYear', name: '元旦', legalDays: 1, displayDays: 1 },
@@ -41,6 +51,11 @@ export const PRESETS: Array<{ name: string; note: string; values: Partial<LifeCo
     name: '体制内 / 外企',
     note: '双休 · 09:00—17:00',
     values: { retireAge: 60, workStart: '09:00', workEnd: '17:00', breakHours: 1, weekendType: 'DOUBLE', annualLeave: 10 },
+  },
+  {
+    name: '北欧福利',
+    note: '三休 · 09:00—16:00',
+    values: { retireAge: 60, workStart: '09:00', workEnd: '16:00', breakHours: 1, weekendType: 'TRIPLE', annualLeave: 20 },
   },
   {
     name: '自由职业',

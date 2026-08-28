@@ -78,7 +78,7 @@ export function ControlSection({ config, onChange, onHolidayChange, onReset, onR
           <RangeField label="中途休息" value={config.breakHours} min={0} max={5} step={0.5} suffix="小时" onChange={(breakHours) => onChange({ breakHours })} />
         </div>
         <Segmented label="周休制度" value={config.weekendType} onChange={(weekendType) => onChange({ weekendType })} options={[
-          { value: 'DOUBLE', label: '双休' }, { value: 'BIG_SMALL', label: '大小休' }, { value: 'SINGLE', label: '单休' }, { value: 'NONE', label: '无休' },
+          { value: 'TRIPLE', label: '三休' }, { value: 'DOUBLE', label: '双休' }, { value: 'BIG_SMALL', label: '大小休' }, { value: 'SINGLE', label: '单休' }, { value: 'NONE', label: '无休' },
         ]} />
 
         <div className="console-divider" />

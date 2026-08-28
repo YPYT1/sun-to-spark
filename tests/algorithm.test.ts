@@ -51,6 +51,14 @@ describe('life time bill', () => {
     expect(result.workPercentage + result.maintenancePercentage + result.freePercentage).toBeCloseTo(100, 8)
   })
 
+  it('counts triple-rest weekends as three rest days per week', () => {
+    const triple = calculateLifeTimeBill({ ...DEFAULT_CONFIG, weekendType: 'TRIPLE', annualLeave: 0 })
+    const double = calculateLifeTimeBill({ ...DEFAULT_CONFIG, weekendType: 'DOUBLE', annualLeave: 0 })
+    expect(triple.annualWorkDays).toBeCloseTo(365.2425 - (365 / 7) * 3 - 13, 3)
+    expect(triple.annualWorkDays).toBeLessThan(double.annualWorkDays)
+    expect(triple.freeHours).toBeGreaterThan(double.freeHours)
+  })
+
   it('changes the lifetime bill when life expectancy changes', () => {
     const age75 = calculateLifeTimeBill({ ...DEFAULT_CONFIG, lifeExpectancy: 75 })
     const age95 = calculateLifeTimeBill({ ...DEFAULT_CONFIG, lifeExpectancy: 95 })

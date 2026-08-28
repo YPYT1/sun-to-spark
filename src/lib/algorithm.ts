@@ -6,6 +6,7 @@ const WEEKS_PER_YEAR = 365 / 7
 const HOURS_PER_DAY = 24
 
 const REST_DAYS_PER_WEEK: Record<WeekendType, number> = {
+  TRIPLE: 3,
   DOUBLE: 2,
   BIG_SMALL: 1.5,
   SINGLE: 1,

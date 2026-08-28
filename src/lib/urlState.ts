@@ -14,7 +14,7 @@ export function readConfigFromUrl(search: string): LifeConfig {
     if (value !== null && Number.isFinite(Number(value))) config[key] = Number(value)
   })
   const weekend = params.get('weekendType') as WeekendType | null
-  if (weekend && ['DOUBLE', 'BIG_SMALL', 'SINGLE', 'NONE'].includes(weekend)) config.weekendType = weekend
+  if (weekend && ['TRIPLE', 'DOUBLE', 'BIG_SMALL', 'SINGLE', 'NONE'].includes(weekend)) config.weekendType = weekend
   const holidayMode = params.get('holidayMode') as HolidayMode | null
   if (holidayMode && ['STANDARD', 'CUSTOM'].includes(holidayMode)) config.holidayMode = holidayMode
   const start = params.get('workStart')
