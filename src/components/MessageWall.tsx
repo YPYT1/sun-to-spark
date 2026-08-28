@@ -60,7 +60,7 @@ function LiquidMessageCard({
   } as CSSProperties
 
   return (
-    <article className={`message-card${expanded ? ' expanded' : ''}`} style={style}>
+    <article className={`message-card${expanded ? ' expanded' : ''}${liking ? ' is-being-liked' : ''}`} style={style}>
       <span className="message-liquid liquid-one" /><span className="message-liquid liquid-two" /><span className="message-liquid liquid-three" />
       <div className="message-card-content">
         <p>{expanded ? message.body : excerpt.text}</p>
@@ -68,12 +68,14 @@ function LiquidMessageCard({
           <time dateTime={message.createdAt}>{relativeMessageTime(message.createdAt)}</time>
           <div className="message-card-actions">
             {excerpt.expandable && (
-              <button type="button" onClick={onToggle} aria-expanded={expanded}>
+              <button className="message-expand" type="button" onClick={onToggle} aria-expanded={expanded}>
                 {expanded ? '收起' : '展开全文'} <ChevronDown size={13} />
               </button>
             )}
             <button className={`message-like${liked ? ' liked' : ''}${liking ? ' is-liking' : ''}`} type="button" onClick={onLike} aria-pressed={liked} disabled={liking}>
-              <Heart size={13} fill={liked ? 'currentColor' : 'none'} /> <span>{message.likes}</span>
+              <span className="message-like-flare" aria-hidden="true"><i /><i /><i /><i /></span>
+              <span className="message-like-heart"><Heart size={13} fill={liked || liking ? 'currentColor' : 'none'} /></span>
+              <span className="message-like-count">{message.likes}</span>
             </button>
           </div>
         </footer>

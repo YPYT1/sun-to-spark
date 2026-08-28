@@ -1,4 +1,5 @@
 import { requireAdmin } from '../../../_lib/admin'
+import { getAdminPagination } from '../../../_lib/admin-pagination'
 import { json, methodNotAllowed } from '../../../_lib/http'
 import { toAdminMessage } from '../../../_lib/message-store'
 import type { AdminMessageRow, Env } from '../../../_lib/types'
@@ -10,9 +11,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const url = new URL(request.url)
   const status = url.searchParams.get('status')
   const normalizedStatus = status === 'visible' || status === 'hidden' ? status : null
-  const requestedPage = Number(url.searchParams.get('page') ?? 1)
-  const page = Number.isFinite(requestedPage) ? Math.max(1, Math.floor(requestedPage)) : 1
-  const pageSize = 50
+  const { page, pageSize, offset } = getAdminPagination(url.searchParams.get('page'))
   const search = (url.searchParams.get('q') ?? '').trim().slice(0, 100)
   const conditions: string[] = []
   const bindings: unknown[] = []
@@ -28,7 +27,6 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
-  const offset = (page - 1) * pageSize
   const [countRow, listResult] = await Promise.all([
     env.DB.prepare(`
       SELECT COUNT(*) AS total

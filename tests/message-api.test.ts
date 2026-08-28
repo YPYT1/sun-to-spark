@@ -21,7 +21,7 @@ describe('message API client', () => {
     const fetchMock = vi.fn().mockResolvedValue(Response.json({
       messages: [],
       page: 3,
-      pageSize: 50,
+      pageSize: 15,
       total: 0,
       totalPages: 0,
     }))
