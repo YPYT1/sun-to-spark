@@ -164,12 +164,13 @@ input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; appearanc
 .bill-primary p { margin: 0 0 14px; color: rgba(255,255,255,.53); font-size: 14px; font-weight: 300; }
 .bill-primary p strong { color: #fff; font-weight: 500; }
 .bill-primary h3 { margin: 0; color: #fff; font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(3.2rem, 7vw, 7rem); font-style: italic; font-weight: 400; letter-spacing: -.06em; line-height: .88; }
-.bill-primary > span { display: block; max-width: 760px; margin-top: 20px; color: rgba(255,255,255,.52); font-size: 14px; font-weight: 300; line-height: 1.55; letter-spacing: .035em; }
+.bill-primary > span { display: block; max-width: 760px; margin-top: 20px; color: rgba(255,255,255,.52); font-size: 14px; font-weight: 300; line-height: 1.55; letter-spacing: .035em; white-space: nowrap; }
+.bill-primary.free > span { max-width: none; }
 .bill-primary.free h3 { color: var(--signal); text-shadow: 0 0 45px rgba(216,255,102,.12); }
 .bill-primary.free .share-pct { color: var(--signal); font-weight: 500; }
 .share-pct { color: var(--signal); font-weight: 500; }
-.bill-free-breakdown { position: relative; z-index: 5; display: grid; gap: 12px; margin-top: 8px; }
-.bill-free-tier { padding: 18px 0; border-top: 1px solid rgba(255,255,255,.08); text-align: left; }
+.bill-free-breakdown { position: relative; z-index: 5; display: grid; gap: 12px; margin-top: 8px; overflow-x: auto; }
+.bill-free-tier { padding: 18px 0; border-top: 1px solid rgba(255,255,255,.08); text-align: left; min-width: min-content; }
 .bill-free-tier span { display: block; color: rgba(255,255,255,.42); font-size: 11px; letter-spacing: .08em; }
 .bill-free-tier strong { display: block; margin-top: 8px; color: rgba(216,255,102,.88); font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(1.65rem, 3.2vw, 2.35rem); font-style: italic; font-weight: 400; letter-spacing: -.04em; line-height: .95; }
 .bill-free-tier small { display: block; margin-top: 8px; color: rgba(255,255,255,.48); font-size: 12px; font-weight: 300; line-height: 1.55; }
