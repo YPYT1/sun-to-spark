@@ -375,6 +375,26 @@ input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; appearanc
 .admin-pagination button:disabled { cursor: not-allowed; opacity: .3; }
 .admin-pagination span { min-width: 58px; color: rgba(255,255,255,.42); text-align: center; font-size: 11px; }
 .admin-empty { border: 1px dashed rgba(255,255,255,.12); border-radius: 20px; padding: 70px 20px; color: rgba(255,255,255,.35); text-align: center; font-size: 13px; }
+.seo-section { padding: 130px 0 110px; }
+.seo-heading { display: grid; grid-template-columns: minmax(150px, .34fr) minmax(0, 1fr); gap: 50px; align-items: start; }
+.seo-heading .section-badge { justify-self: start; }
+.seo-heading h2 { margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(2.8rem, 5vw, 5rem); font-style: italic; font-weight: 400; letter-spacing: -.045em; line-height: .92; }
+.seo-heading p { max-width: 650px; margin: 20px 0 0; color: rgba(255,255,255,.48); font-size: 14px; font-weight: 300; line-height: 1.75; }
+.seo-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 55px; }
+.seo-facts article { border-radius: 24px; padding: 28px; }
+.seo-facts article > * { position: relative; z-index: 3; }
+.seo-facts article > span { color: var(--signal); font-size: 9px; letter-spacing: .15em; }
+.seo-facts h3 { margin: 38px 0 13px; font-family: 'Instrument Serif', Georgia, serif; font-size: 1.75rem; font-style: italic; font-weight: 400; line-height: 1.05; }
+.seo-facts p { margin: 0; color: rgba(255,255,255,.5); font-size: 12px; font-weight: 300; line-height: 1.75; }
+.seo-faq { max-width: 930px; margin: 72px auto 0; }
+.seo-faq-label { display: block; margin-bottom: 18px; color: rgba(255,255,255,.36); font-size: 10px; letter-spacing: .16em; }
+.seo-faq details { border-top: 1px solid rgba(255,255,255,.1); }
+.seo-faq details:last-child { border-bottom: 1px solid rgba(255,255,255,.1); }
+.seo-faq summary { display: flex; cursor: pointer; align-items: center; justify-content: space-between; gap: 20px; padding: 21px 0; color: rgba(255,255,255,.82); font-size: 14px; list-style: none; }
+.seo-faq summary::-webkit-details-marker { display: none; }
+.seo-faq summary span { color: var(--signal); font-size: 20px; font-weight: 300; transition: transform .25s ease; }
+.seo-faq details[open] summary span { transform: rotate(45deg); }
+.seo-faq details p { max-width: 780px; margin: -4px 0 22px; color: rgba(255,255,255,.48); font-size: 12px; font-weight: 300; line-height: 1.8; }
 .site-footer { display: grid; width: min(1320px, calc(100% - 64px)); margin: 0 auto; grid-template-columns: 1fr auto 1fr; align-items: center; border-top: 1px solid rgba(255,255,255,.09); padding: 30px 0 40px; color: rgba(255,255,255,.36); font-size: 10px; }
 .site-footer .brand { color: #fff; }
 .site-footer p a { color: rgba(255,255,255,.58); text-decoration: underline; text-decoration-color: rgba(255,255,255,.18); text-underline-offset: 3px; }
@@ -494,6 +514,12 @@ input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; appearanc
   .admin-mute-panel { align-items: stretch; flex-direction: column; }
   .admin-mute-panel > div { align-items: stretch; flex-direction: column; }
   .admin-message footer { align-items: flex-start; flex-direction: column; }
+  .seo-section { padding: 95px 0 85px; }
+  .seo-heading { grid-template-columns: 1fr; gap: 24px; }
+  .seo-heading h2 { font-size: 3.15rem; }
+  .seo-facts { grid-template-columns: 1fr; margin-top: 38px; }
+  .seo-facts h3 { margin-top: 28px; }
+  .seo-faq { margin-top: 52px; }
   .site-footer { grid-template-columns: 1fr; gap: 20px; text-align: left; }
   .site-footer div { justify-content: flex-start; }
   .poster-scroll { padding: 18px; }

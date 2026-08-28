@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://sun-to-spark.pages.dev/sitemap.xml
+Host: sun-to-spark.pages.dev

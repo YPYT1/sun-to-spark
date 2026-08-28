@@ -4,13 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#050505">
-    <meta name="description" content="余生账单：算算从现在到预期寿命，工作、生存损耗与真正自由时间各占多少。">
-    <meta property="og:title" content="余生账单｜你把多少人生交给了工作？">
-    <meta property="og:description" content="把上下班、调休、通勤与睡眠放进同一张账单，看看真正属于你的时间还剩多少。">
+    <meta name="application-name" content="余生账单">
+    <meta name="author" content="LiamWang">
+    <meta name="description" content="余生账单是一个工作时间与自由时间计算器，可对比 996、大小休、单休和双休作息，估算退休前后真正属于自己的时间。">
+    <meta name="keywords" content="余生账单,工作时间计算器,自由时间计算器,996工作制,单休,大小休,双休,加班,退休时间,人生时间">
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <link rel="canonical" href="https://sun-to-spark.pages.dev/">
+    <link rel="alternate" hreflang="zh-CN" href="https://sun-to-spark.pages.dev/">
+    <link rel="alternate" hreflang="x-default" href="https://sun-to-spark.pages.dev/">
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta property="og:title" content="余生账单｜996、单休与双休的人生时间计算器">
+    <meta property="og:description" content="把上下班、周休、假期、通勤和睡眠放进同一张账单，看看真正属于你的时间还剩多少。">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="/hero-poster.jpg">
+    <meta property="og:url" content="https://sun-to-spark.pages.dev/">
+    <meta property="og:site_name" content="余生账单">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://sun-to-spark.pages.dev/hero-poster.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1920">
+    <meta property="og:image:height" content="1080">
+    <meta property="og:image:alt" content="余生账单——人生时间计算器">
     <meta name="twitter:card" content="summary_large_image">
-    <title>余生账单｜你把多少人生交给了工作？</title>
+    <meta name="twitter:title" content="余生账单｜你把多少人生交给了工作？">
+    <meta name="twitter:description" content="对比 996、单休、大小休与双休，估算剩余人生中的工作占用和自由时间。">
+    <meta name="twitter:image" content="https://sun-to-spark.pages.dev/hero-poster.jpg">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://sun-to-spark.pages.dev/#website",
+            "url": "https://sun-to-spark.pages.dev/",
+            "name": "余生账单",
+            "alternateName": "Life Time Bill",
+            "description": "一个对比 996、单休、大小休与双休的人生时间计算器。",
+            "inLanguage": "zh-CN",
+            "publisher": { "@id": "https://sun-to-spark.pages.dev/#author" }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://sun-to-spark.pages.dev/#author",
+            "name": "LiamWang",
+            "email": "mailto:ypyt147@163.com"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://sun-to-spark.pages.dev/#app",
+            "url": "https://sun-to-spark.pages.dev/",
+            "name": "余生账单",
+            "applicationCategory": "LifestyleApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript and a modern web browser",
+            "isAccessibleForFree": true,
+            "inLanguage": "zh-CN",
+            "description": "根据年龄、退休年龄、上下班、周休、假期、通勤、睡眠和家务，估算工作占用、生存损耗和真正自由时间。",
+            "featureList": ["996、单休、大小休与双休对比", "退休前后自由时间估算", "人生时间账单图片导出", "匿名留言墙"],
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+            "author": { "@id": "https://sun-to-spark.pages.dev/#author" }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://sun-to-spark.pages.dev/#faq",
+            "url": "https://sun-to-spark.pages.dev/#faq",
+            "inLanguage": "zh-CN",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "余生账单可以计算什么？",
+                "acceptedAnswer": { "@type": "Answer", "text": "它会根据当前年龄、预期寿命、退休年龄、上下班时间、周休制度、假期、通勤、睡眠和家务，估算剩余人生中的工作占用、生存损耗和真正自由时间。" }
+              },
+              {
+                "@type": "Question",
+                "name": "工作时间是怎么计算的？",
+                "acceptedAnswer": { "@type": "Answer", "text": "工作账单按上班到下班的完整在岗跨度计算，再结合双休、大小休、单休或无休、法定节假日和年假，估算退休前累计被工作占用的时间。" }
+              },
+              {
+                "@type": "Question",
+                "name": "真正自由时间包含哪些？",
+                "acceptedAnswer": { "@type": "Answer", "text": "退休前自由时间会扣除在岗、睡眠、通勤和家务；退休后自由时间会扣除睡眠和家务。两部分相加，得到从现在到预期寿命的自由时间总计。" }
+              },
+              {
+                "@type": "Question",
+                "name": "可以对比 996、单休和双休吗？",
+                "acceptedAnswer": { "@type": "Answer", "text": "可以。网站提供 996 打工人、大小休打工人、标准打工人、双休、三休、北漂通勤和自由职业等场景，可以在同一人生坐标下对比工作占比。" }
+              },
+              {
+                "@type": "Question",
+                "name": "账单数据和留言保存在哪里？",
+                "acceptedAnswer": { "@type": "Answer", "text": "账单计算参数保存在当前浏览器中。匿名留言提交后会公开展示并保存在服务端，前台不展示系统生成的匿名用户名。" }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+    <title>余生账单｜996、单休与双休的工作时间计算器</title>
   </head>
   <body>
     <div id="root"></div>

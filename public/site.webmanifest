@@ -1,0 +1,19 @@
+{
+  "name": "余生账单",
+  "short_name": "余生账单",
+  "description": "对比 996、单休、大小休与双休的人生时间计算器。",
+  "lang": "zh-CN",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
