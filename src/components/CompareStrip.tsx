@@ -7,24 +7,31 @@ import type { BillResult, LifeConfig } from '../types'
 interface CompareStripProps {
   config: LifeConfig
   result: BillResult
-  onApply: (values: Partial<LifeConfig>) => void
 }
 
-export function CompareStrip({ config, result, onApply }: CompareStripProps) {
-  const rows = useMemo(() => COMPARE_PRESETS
-    .map((preset) => {
-      const next = calculateLifeTimeBill({ ...config, ...preset.values })
-      return {
-        ...preset,
-        workPercentage: next.workPercentage,
-        freePercentage: next.freePercentage,
-        delta: describeDelta(result.workPercentage, next.workPercentage),
-        isCurrent:
-          Math.abs(next.workHours - result.workHours) < 1
-          && Math.abs(next.freeHours - result.freeHours) < 1,
-      }
-    })
-    .sort((a, b) => b.workPercentage - a.workPercentage), [config, result])
+export function CompareStrip({ config, result }: CompareStripProps) {
+  const rows = useMemo(() => {
+    const rankedRows = COMPARE_PRESETS
+      .map((preset) => {
+        const next = calculateLifeTimeBill({ ...config, ...preset.values })
+        return {
+          ...preset,
+          workPercentage: next.workPercentage,
+          freePercentage: next.freePercentage,
+          delta: describeDelta(result.workPercentage, next.workPercentage),
+        }
+      })
+      .sort((a, b) => b.workPercentage - a.workPercentage)
+
+    const currentTier = rankedRows.reduce((closest, row) => (
+      Math.abs(row.workPercentage - result.workPercentage)
+        < Math.abs(closest.workPercentage - result.workPercentage)
+        ? row
+        : closest
+    ))
+
+    return rankedRows.map((row) => ({ ...row, isCurrent: row.name === currentTier.name }))
+  }, [config, result])
 
   return (
     <div className="compare-strip" id="compare">
@@ -34,14 +41,10 @@ export function CompareStrip({ config, result, onApply }: CompareStripProps) {
       </div>
       <div className="compare-rows">
         {rows.map((row) => (
-          <button
-            type="button"
-            className={`compare-row${row.isCurrent ? ' current' : ''}`}
+          <article
+            className={`compare-row liquid-glass${row.isCurrent ? ' current' : ''}`}
             key={row.name}
-            onClick={() => {
-              onApply(row.values)
-              document.querySelector('#bill')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }}
+            aria-current={row.isCurrent ? 'true' : undefined}
           >
             <span className="compare-name">
               <b>{row.name}</b>
@@ -52,7 +55,7 @@ export function CompareStrip({ config, result, onApply }: CompareStripProps) {
               <em>工作占比</em>
             </span>
             <span className="compare-delta">{row.isCurrent ? '当前账单' : row.delta}</span>
-          </button>
+          </article>
         ))}
       </div>
     </div>

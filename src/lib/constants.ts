@@ -38,7 +38,7 @@ export const DEFAULT_CONFIG: LifeConfig = {
 
 export const PRESETS: Array<{ name: string; note: string; values: Partial<LifeConfig> }> = [
   {
-    name: '大厂 996',
+    name: '996打工人',
     note: '单休 · 10:00—22:00',
     values: { retireAge: 65, workStart: '10:00', workEnd: '22:00', breakHours: 2, weekendType: 'SINGLE', annualLeave: 0 },
   },
@@ -68,7 +68,7 @@ export const PRESETS: Array<{ name: string; note: string; values: Partial<LifeCo
 export const COMPARE_PRESETS: Array<{ name: string; note: string; values: Partial<LifeConfig> }> = [
   ...PRESETS,
   {
-    name: '007 福报',
+    name: '标准打工人',
     note: '双休 · 09:00—21:00',
     values: { retireAge: 65, workStart: '09:00', workEnd: '21:00', breakHours: 1.5, weekendType: 'DOUBLE', annualLeave: 5 },
   },

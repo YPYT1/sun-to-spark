@@ -6,13 +6,19 @@
   "packageManager": "pnpm@11.1.2",
   "pnpm": {
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "workerd"
     ]
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "concurrently --kill-others --success first \"vite\" \"wrangler pages dev --env-file .env.local --port 8788\"",
+    "dev:ui": "vite",
+    "dev:full": "concurrently --kill-others --success first \"vite\" \"wrangler pages dev --env-file .env.local --port 8788\"",
+    "build": "tsc -b && tsc -p tsconfig.functions.json && vite build",
     "preview": "vite preview",
+    "db:migrate:local": "wrangler d1 migrations apply sun-to-spark-messages --local",
+    "db:migrate:remote": "wrangler d1 migrations apply sun-to-spark-messages --remote",
+    "deploy": "wrangler pages deploy",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -26,15 +32,18 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260827.1",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.3",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^10.0.5",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2",
     "vite": "^6.0.5",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "wrangler": "^4.126.0"
   }
 }

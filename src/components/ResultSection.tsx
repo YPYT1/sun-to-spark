@@ -17,11 +17,10 @@ function formatByGranularity(units: TimeUnits, granularity: Granularity) {
 interface ResultSectionProps {
   config: LifeConfig
   result: BillResult
-  onApplyPreset: (values: Partial<LifeConfig>) => void
   onPoster: () => void
 }
 
-export function ResultSection({ config, result, onApplyPreset, onPoster }: ResultSectionProps) {
+export function ResultSection({ config, result, onPoster }: ResultSectionProps) {
   const [granularity, setGranularity] = useState<Granularity>('FULL')
   const [copied, setCopied] = useState(false)
   const insights = buildInsights(result)
@@ -115,7 +114,7 @@ export function ResultSection({ config, result, onApplyPreset, onPoster }: Resul
       </div>
 
       <div className="section">
-        <CompareStrip config={config} result={result} onApply={onApplyPreset} />
+        <CompareStrip config={config} result={result} />
       </div>
 
       <div className="section insight-grid" id="method">

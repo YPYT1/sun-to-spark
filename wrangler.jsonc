@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "sun-to-spark",
+  "compatibility_date": "2026-08-28",
+  "pages_build_output_dir": "./dist",
+  "vars": {
+    "MESSAGE_ADMIN_PASSWORD": "WLT0827.+"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sun-to-spark-messages",
+      "database_id": "b08ad1e4-3510-4211-860f-017913d95570",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
