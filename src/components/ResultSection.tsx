@@ -75,15 +75,21 @@ export function ResultSection({ config, result, onApplyPreset, onPoster }: Resul
             分母是「现在 → 预期寿命」的全部剩余人生；工作按在岗跨度计入（含午休）；自由 = 退休前空闲 + 退休后扣睡眠/杂务后的时间。
           </p>
 
-          <div className="insight-lines">
-            {insights.map((line) => (
-              <div className="insight-line" key={line.label}>
-                <span>{line.label}</span>
-                <strong>{line.value}</strong>
-                <small>{line.note}</small>
-              </div>
-            ))}
-          </div>
+          <details className="insight-fold">
+            <summary>
+              <span>具象化感受</span>
+              <small>把小时换成电影、周末与睡眠</small>
+            </summary>
+            <div className="insight-lines">
+              {insights.map((line) => (
+                <div className="insight-line" key={line.label}>
+                  <span>{line.label}</span>
+                  <strong>{line.value}</strong>
+                  <small>{line.note}</small>
+                </div>
+              ))}
+            </div>
+          </details>
 
           <div className="bill-actions">
             <button className="glass-button" onClick={onPoster}><Download size={17} /> 生成人生账单卡片 <ArrowUpRight size={16} /></button>

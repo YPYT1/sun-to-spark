@@ -1,6 +1,7 @@
+import { useMemo } from 'react'
 import { calculateLifeTimeBill } from '../lib/algorithm'
-import { describeDelta } from '../lib/insights'
-import { PRESETS } from '../lib/constants'
+import { describeDelta, workShareColor } from '../lib/insights'
+import { COMPARE_PRESETS } from '../lib/constants'
 import type { BillResult, LifeConfig } from '../types'
 
 interface CompareStripProps {
@@ -10,18 +11,20 @@ interface CompareStripProps {
 }
 
 export function CompareStrip({ config, result, onApply }: CompareStripProps) {
-  const rows = PRESETS.map((preset) => {
-    const next = calculateLifeTimeBill({ ...config, ...preset.values })
-    return {
-      ...preset,
-      workPercentage: next.workPercentage,
-      freePercentage: next.freePercentage,
-      delta: describeDelta(result.workPercentage, next.workPercentage),
-      isCurrent:
-        Math.abs(next.workHours - result.workHours) < 1
-        && Math.abs(next.freeHours - result.freeHours) < 1,
-    }
-  })
+  const rows = useMemo(() => COMPARE_PRESETS
+    .map((preset) => {
+      const next = calculateLifeTimeBill({ ...config, ...preset.values })
+      return {
+        ...preset,
+        workPercentage: next.workPercentage,
+        freePercentage: next.freePercentage,
+        delta: describeDelta(result.workPercentage, next.workPercentage),
+        isCurrent:
+          Math.abs(next.workHours - result.workHours) < 1
+          && Math.abs(next.freeHours - result.freeHours) < 1,
+      }
+    })
+    .sort((a, b) => b.workPercentage - a.workPercentage), [config, result])
 
   return (
     <div className="compare-strip" id="compare">
@@ -45,7 +48,7 @@ export function CompareStrip({ config, result, onApply }: CompareStripProps) {
               <small>{row.note}</small>
             </span>
             <span className="compare-stats">
-              <strong>{row.workPercentage.toFixed(1)}%</strong>
+              <strong style={{ color: workShareColor(row.workPercentage) }}>{row.workPercentage.toFixed(1)}%</strong>
               <em>工作占比</em>
             </span>
             <span className="compare-delta">{row.isCurrent ? '当前账单' : row.delta}</span>

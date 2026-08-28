@@ -39,3 +39,13 @@ export function describeDelta(currentWorkPct: number, otherWorkPct: number): str
   if (delta > 0) return `工作占比多 ${delta.toFixed(1)} 个百分点`
   return `工作占比少 ${Math.abs(delta).toFixed(1)} 个百分点`
 }
+
+/** 工作占比越高，红色越深；越低则越浅 */
+export function workShareColor(percentage: number): string {
+  const t = Math.min(1, Math.max(0, (percentage - 6) / 34))
+  const hue = 4
+  const saturation = 52 + t * 30
+  const lightness = 74 - t * 38
+  return `hsl(${hue} ${saturation}% ${lightness}%)`
+}
+

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { calculateLifeTimeBill } from '../src/lib/algorithm'
 import { DEFAULT_CONFIG } from '../src/lib/constants'
-import { buildInsights, describeDelta } from '../src/lib/insights'
+import { buildInsights, describeDelta, workShareColor } from '../src/lib/insights'
 
 describe('insights', () => {
   it('builds concrete metaphors from bill hours', () => {
@@ -16,5 +16,12 @@ describe('insights', () => {
     expect(describeDelta(20, 30)).toContain('多')
     expect(describeDelta(30, 20)).toContain('少')
     expect(describeDelta(22.3, 22.35)).toContain('几乎一样')
+  })
+
+  it('maps higher work share to a deeper red', () => {
+    expect(workShareColor(10)).not.toBe(workShareColor(35))
+    const light = Number(workShareColor(10).match(/([\d.]+)%\)$/)?.[1])
+    const deep = Number(workShareColor(35).match(/([\d.]+)%\)$/)?.[1])
+    expect(deep).toBeLessThan(light)
   })
 })
