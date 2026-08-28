@@ -34,7 +34,11 @@ export async function passwordMatches(input: string, configured: string): Promis
 }
 
 export async function hashClientIp(ip: string, salt: string): Promise<string> {
-  return toHex(await hmac(ip, salt))
+  return hashIdentifier(ip, salt)
+}
+
+export async function hashIdentifier(value: string, salt: string): Promise<string> {
+  return toHex(await hmac(value, salt))
 }
 
 export async function createAdminSession(secret: string, now = Date.now()): Promise<string> {

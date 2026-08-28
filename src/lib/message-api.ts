@@ -31,8 +31,12 @@ export async function postMessage(body: string): Promise<PublicMessage> {
   return payload.message
 }
 
-export async function likeMessage(id: string): Promise<{ liked: boolean; likes: number }> {
-  return requestJson<{ liked: boolean; likes: number }>(`/api/messages/${encodeURIComponent(id)}/like`, { method: 'POST' })
+export async function likeMessage(id: string, liked: boolean): Promise<{ liked: boolean; likes: number }> {
+  return requestJson<{ liked: boolean; likes: number }>(`/api/messages/${encodeURIComponent(id)}/like`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ liked }),
+  })
 }
 
 export interface AdminMessagePage {
@@ -41,13 +45,18 @@ export interface AdminMessagePage {
   pageSize: number
   total: number
   totalPages: number
+  sort: AdminMessageSort
 }
 
-export async function fetchAdminMessages(status: 'all' | 'visible' | 'hidden', page = 1, query = ''): Promise<AdminMessagePage> {
+export type AdminMessageFilter = 'all' | 'visible' | 'hidden' | 'deleted'
+export type AdminMessageSort = 'latest' | 'likes_desc' | 'likes_asc'
+
+export async function fetchAdminMessages(status: AdminMessageFilter, page = 1, query = '', sort: AdminMessageSort = 'latest'): Promise<AdminMessagePage> {
   const search = new URLSearchParams()
   if (status !== 'all') search.set('status', status)
   search.set('page', String(page))
   if (query) search.set('q', query)
+  search.set('sort', sort)
   return requestJson<AdminMessagePage>(`/api/admin/messages?${search}`, undefined)
 }
 
@@ -81,6 +90,14 @@ export async function setMessageStatus(id: string, status: 'visible' | 'hidden')
   })
 }
 
-export async function deleteMessage(id: string): Promise<void> {
+export async function softDeleteMessage(id: string): Promise<void> {
   await requestJson(`/api/admin/messages/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+export async function restoreMessage(id: string): Promise<void> {
+  await requestJson(`/api/admin/messages/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deleted: false }),
+  })
 }

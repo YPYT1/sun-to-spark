@@ -19,5 +19,6 @@ export function toAdminMessage(row: AdminMessageRow): AdminMessageDto {
     visitorId: row.visitor_id,
     displayName: row.display_name ?? (row.source === 'seed' ? '往期匿名留言' : '历史匿名用户'),
     mutedUntil: row.muted_until ?? null,
+    deletedAt: row.deleted_at,
   }
 }

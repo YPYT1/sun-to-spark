@@ -52,6 +52,7 @@ function LiquidMessageCard({
 }) {
   const palette = LIQUID_PALETTES[paletteIndex]!
   const excerpt = excerptMessage(message.body)
+  const unliking = liking && liked
   const style = {
     '--liquid-a': palette[0],
     '--liquid-b': palette[1],
@@ -60,7 +61,7 @@ function LiquidMessageCard({
   } as CSSProperties
 
   return (
-    <article className={`message-card${expanded ? ' expanded' : ''}${liking ? ' is-being-liked' : ''}`} style={style}>
+    <article className={`message-card${expanded ? ' expanded' : ''}${liking ? unliking ? ' is-being-unliked' : ' is-being-liked' : ''}`} style={style}>
       <span className="message-liquid liquid-one" /><span className="message-liquid liquid-two" /><span className="message-liquid liquid-three" />
       <div className="message-card-content">
         <p>{expanded ? message.body : excerpt.text}</p>
@@ -72,7 +73,7 @@ function LiquidMessageCard({
                 {expanded ? '收起' : '展开全文'} <ChevronDown size={13} />
               </button>
             )}
-            <button className={`message-like${liked ? ' liked' : ''}${liking ? ' is-liking' : ''}`} type="button" onClick={onLike} aria-pressed={liked} disabled={liking}>
+            <button className={`message-like${liked ? ' liked' : ''}${liking ? unliking ? ' is-unliking' : ' is-liking' : ''}`} type="button" onClick={onLike} aria-pressed={liked} disabled={liking}>
               <span className="message-like-flare" aria-hidden="true"><i /><i /><i /><i /></span>
               <span className="message-like-heart"><Heart size={13} fill={liked || liking ? 'currentColor' : 'none'} /></span>
               <span className="message-like-count">{message.likes}</span>
@@ -157,19 +158,19 @@ export function MessageWall() {
   }
 
   const like = async (id: string) => {
-    if (likedIds.has(id) || likingId) return
+    if (likingId) return
+    const desired = !likedIds.has(id)
     setLikingId(id)
     try {
-      const result = await likeMessage(id)
+      const result = await likeMessage(id, desired)
       setMessages((current) => current.map((item) => item.id === id ? { ...item, likes: result.likes } : item))
-      if (result.liked) {
-        setLikedIds((current) => {
-          const next = new Set(current)
-          next.add(id)
-          window.localStorage.setItem('life-time-bill-liked-messages', JSON.stringify([...next]))
-          return next
-        })
-      }
+      setLikedIds((current) => {
+        const next = new Set(current)
+        if (result.liked) next.add(id)
+        else next.delete(id)
+        window.localStorage.setItem('life-time-bill-liked-messages', JSON.stringify([...next]))
+        return next
+      })
     } catch {
       setNotice('点赞失败，请稍后再试')
     } finally {

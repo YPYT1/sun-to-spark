@@ -11,6 +11,7 @@ import {
   evaluatePostingPolicy,
   validateMessageBody,
 } from '../functions/_lib/message-policy'
+import { normalizeLikeRequest } from '../functions/_lib/like-policy'
 import {
   buildVisitorDisplayName,
   evaluateMute,
@@ -74,5 +75,11 @@ describe('message server policy', () => {
     expect(evaluateMute('2026-08-28T07:59:59.000Z', now)).toEqual({ muted: false })
     expect(evaluateMute('2026-08-28T10:00:00.000Z', now)).toEqual({ muted: true, error: '该浏览器已被禁言，剩余约 2 小时' })
     expect(evaluateMute('9999-12-31T23:59:59.999Z', now)).toEqual({ muted: true, error: '该浏览器已被永久禁言' })
+  })
+
+  it('accepts an explicit like or unlike target state', () => {
+    expect(normalizeLikeRequest({ liked: true })).toEqual({ ok: true, liked: true })
+    expect(normalizeLikeRequest({ liked: false })).toEqual({ ok: true, liked: false })
+    expect(normalizeLikeRequest({})).toEqual({ ok: false, error: '无效的点赞状态' })
   })
 })

@@ -80,7 +80,7 @@ function SiteApp() {
       <MessageWall />
       <footer className="site-footer">
         <a className="brand" href="#top"><span className="brand-mark"><span /></span><span>余生账单</span></a>
-        <p>© 2026 Life Time Bill · 作者 @LiamWang · 数据只保存在你的浏览器中</p>
+        <p>© 2026 Life Time Bill · 作者 @LiamWang · 邮箱 <a href="mailto:ypyt147@163.com">ypyt147@163.com</a> · 数据只保存在你的浏览器中</p>
         <div><a href="#method">计算方式</a><a href="#compare">对比活法</a><a href="#calculator">重新计算</a></div>
       </footer>
       <PosterModal open={posterOpen} onClose={() => setPosterOpen(false)} config={config} result={result} />

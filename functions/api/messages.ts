@@ -11,9 +11,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const requested = Number(new URL(request.url).searchParams.get('limit') ?? 60)
   const limit = Number.isFinite(requested) ? Math.min(60, Math.max(1, Math.floor(requested))) : 60
   const result = await env.DB.prepare(`
-    SELECT id, body, likes_count, status, source, color_seed, created_at, updated_at, ip_hash, visitor_id
+    SELECT id, body, likes_count, status, source, color_seed, created_at, updated_at, ip_hash, visitor_id, deleted_at
     FROM messages
-    WHERE status = 'visible'
+    WHERE status = 'visible' AND deleted_at IS NULL
     ORDER BY created_at DESC, id DESC
     LIMIT ?
   `).bind(limit).all<MessageRow>()
@@ -77,7 +77,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   `).bind(id, validation.body, colorSeed, ipHash, identity.visitor.id).run()
 
   const row = await env.DB.prepare(`
-    SELECT id, body, likes_count, status, source, color_seed, created_at, updated_at, ip_hash, visitor_id
+    SELECT id, body, likes_count, status, source, color_seed, created_at, updated_at, ip_hash, visitor_id, deleted_at
     FROM messages WHERE id = ?
   `).bind(id).first<MessageRow>()
   if (!row) return json({ error: '留言保存失败' }, { status: 500 })

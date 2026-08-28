@@ -4,25 +4,28 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
+  Heart,
   LogOut,
   RefreshCw,
+  RotateCcw,
   Search,
   ShieldCheck,
   Trash2,
 } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import {
-  deleteMessage,
   fetchAdminMessages,
   loginAdmin,
   logoutAdmin,
   muteVisitor,
+  restoreMessage,
   setMessageStatus,
+  softDeleteMessage,
+  type AdminMessageFilter,
+  type AdminMessageSort,
   type MuteDuration,
 } from '../lib/message-api'
 import { formatAdminTimestamp, type AdminMessage } from '../lib/messages'
-
-type Filter = 'all' | 'visible' | 'hidden'
 
 const MUTE_OPTIONS: Array<{ value: MuteDuration; label: string }> = [
   { value: '1h', label: '1 小时' },
@@ -45,7 +48,8 @@ function muteLabel(until: string | null): string {
 export function AdminPage() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
   const [password, setPassword] = useState('')
-  const [filter, setFilter] = useState<Filter>('all')
+  const [filter, setFilter] = useState<AdminMessageFilter>('all')
+  const [sort, setSort] = useState<AdminMessageSort>('latest')
   const [searchInput, setSearchInput] = useState('')
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
@@ -57,22 +61,29 @@ export function AdminPage() {
   const [muteChoices, setMuteChoices] = useState<Record<string, MuteDuration>>({})
   const [customUntil, setCustomUntil] = useState<Record<string, string>>({})
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (quiet = false) => {
     try {
-      const result = await fetchAdminMessages(filter, page, query)
+      const result = await fetchAdminMessages(filter, page, query, sort)
       setAuthenticated(true)
       setMessages(result.messages)
       setTotal(result.total)
       setTotalPages(result.totalPages)
-      setNotice('')
+      if (!quiet) setNotice('')
     } catch (error) {
       const message = error instanceof Error ? error.message : '加载失败'
       if (message.includes('登录')) setAuthenticated(false)
-      else setNotice(message)
+      else if (!quiet) setNotice(message)
     }
-  }, [filter, page, query])
+  }, [filter, page, query, sort])
 
   useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    if (authenticated !== true) return
+    const timer = window.setInterval(() => {
+      if (!document.hidden) void load(true)
+    }, 10_000)
+    return () => window.clearInterval(timer)
+  }, [authenticated, load])
 
   const login = async (event: FormEvent) => {
     event.preventDefault()
@@ -110,14 +121,27 @@ export function AdminPage() {
   }
 
   const remove = async (message: AdminMessage) => {
-    if (!window.confirm('永久删除这条留言？此操作不能撤销。')) return
+    if (!window.confirm('将这条留言移入“已删除”？之后可以恢复。')) return
     setBusyId(message.id)
     try {
-      await deleteMessage(message.id)
+      await softDeleteMessage(message.id)
       if (messages.length === 1 && page > 1) setPage((current) => current - 1)
       else await load()
     } catch (error) {
       setNotice(error instanceof Error ? error.message : '删除失败')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const restore = async (message: AdminMessage) => {
+    setBusyId(message.id)
+    try {
+      await restoreMessage(message.id)
+      if (messages.length === 1 && page > 1) setPage((current) => current - 1)
+      else await load()
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '恢复失败')
     } finally {
       setBusyId(null)
     }
@@ -172,16 +196,24 @@ export function AdminPage() {
 
       <section className="admin-controls">
         <nav className="admin-filters" aria-label="留言状态筛选">
-          {(['all', 'visible', 'hidden'] as const).map((value) => (
+          {(['all', 'visible', 'hidden', 'deleted'] as const).map((value) => (
             <button
               className={filter === value ? 'active' : ''}
               onClick={() => { setFilter(value); setPage(1) }}
               key={value}
             >
-              {{ all: '全部', visible: '公开', hidden: '已隐藏' }[value]}
+              {{ all: '全部', visible: '公开', hidden: '已隐藏', deleted: '已删除' }[value]}
             </button>
           ))}
         </nav>
+        <label className="admin-sort">
+          <span>排序</span>
+          <select value={sort} onChange={(event) => { setSort(event.target.value as AdminMessageSort); setPage(1) }}>
+            <option value="latest">最新留言</option>
+            <option value="likes_desc">点赞从高到低</option>
+            <option value="likes_asc">点赞从低到高</option>
+          </select>
+        </label>
         <form className="admin-search" onSubmit={search}>
           <Search size={16} />
           <input
@@ -197,13 +229,14 @@ export function AdminPage() {
 
       <div className="admin-summary">
         <span>{query ? `“${query}”共找到 ${total} 条` : `共 ${total} 条留言`}</span>
-        <span>第 {totalPages ? page : 0} / {totalPages} 页</span>
+        <span>每 10 秒同步点赞 · 第 {totalPages ? page : 0} / {totalPages} 页</span>
       </div>
       <p className="admin-notice" role="status">{notice}</p>
 
       <section className="admin-message-list">
         {messages.map((message) => {
           const visitorId = message.visitorId
+          const deleted = Boolean(message.deletedAt)
           const visitorMuted = isMuted(message.mutedUntil)
           const visitorBusy = busyId === visitorId
           const selectedMute = visitorId ? muteChoices[visitorId] ?? '1d' : '1d'
@@ -211,8 +244,9 @@ export function AdminPage() {
             <article className="admin-message liquid-glass" key={message.id}>
               <div className="admin-message-meta">
                 <span className="admin-visitor-name">{message.displayName}</span>
-                <span>{formatAdminTimestamp(message.createdAt)}（北京时间）</span>
-                <b className={message.status}>{message.status === 'visible' ? '公开' : '已隐藏'}</b>
+                <span className="admin-message-time">{formatAdminTimestamp(message.createdAt)}（北京时间）</span>
+                <span className="admin-message-likes"><Heart size={12} fill="currentColor" />{message.likes}</span>
+                <b className={deleted ? 'deleted' : message.status}>{deleted ? '已删除' : message.status === 'visible' ? '公开' : '已隐藏'}</b>
               </div>
               <p>{message.body}</p>
               {visitorId && (
@@ -241,12 +275,18 @@ export function AdminPage() {
                 </div>
               )}
               <footer>
-                <span>{message.source === 'seed' ? '预置留言' : `用户 ID：${message.visitorId ?? '历史数据'}`}</span>
+                <span>{message.source === 'seed' ? '预置留言' : `用户 ID：${message.visitorId ?? '历史数据'}`}{message.deletedAt ? ` · 删除于 ${formatAdminTimestamp(message.deletedAt)}` : ''}</span>
                 <div>
-                  <button disabled={busyId === message.id} onClick={() => void changeStatus(message)}>
-                    {message.status === 'visible' ? <EyeOff size={15} /> : <Eye size={15} />}{message.status === 'visible' ? '隐藏' : '恢复'}
-                  </button>
-                  <button className="danger" disabled={busyId === message.id} onClick={() => void remove(message)}><Trash2 size={15} />删除</button>
+                  {deleted ? (
+                    <button className="restore" disabled={busyId === message.id} onClick={() => void restore(message)}><RotateCcw size={15} />恢复留言</button>
+                  ) : (
+                    <>
+                      <button disabled={busyId === message.id} onClick={() => void changeStatus(message)}>
+                        {message.status === 'visible' ? <EyeOff size={15} /> : <Eye size={15} />}{message.status === 'visible' ? '隐藏' : '恢复'}
+                      </button>
+                      <button className="danger" disabled={busyId === message.id} onClick={() => void remove(message)}><Trash2 size={15} />移入已删除</button>
+                    </>
+                  )}
                 </div>
               </footer>
             </article>

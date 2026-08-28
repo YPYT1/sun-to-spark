@@ -13,6 +13,7 @@ export interface AdminMessage extends PublicMessage {
   visitorId: string | null
   displayName: string
   mutedUntil: string | null
+  deletedAt: string | null
 }
 
 export function formatAdminTimestamp(value: string): string {

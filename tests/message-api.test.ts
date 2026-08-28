@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { fetchAdminMessages, fetchMessages, muteVisitor } from '../src/lib/message-api'
+import { fetchAdminMessages, fetchMessages, likeMessage, muteVisitor, restoreMessage } from '../src/lib/message-api'
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -27,9 +27,22 @@ describe('message API client', () => {
     }))
     vi.stubGlobal('fetch', fetchMock)
 
-    await fetchAdminMessages('hidden', 3, '海獭 加班')
+    await fetchAdminMessages('hidden', 3, '海獭 加班', 'likes_desc')
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/admin/messages?status=hidden&page=3&q=%E6%B5%B7%E7%8D%AD+%E5%8A%A0%E7%8F%AD', undefined)
+    expect(fetchMock).toHaveBeenCalledWith('/api/admin/messages?status=hidden&page=3&q=%E6%B5%B7%E7%8D%AD+%E5%8A%A0%E7%8F%AD&sort=likes_desc', undefined)
+  })
+
+  it('requests the desired unlike state instead of a one-way like', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ liked: false, likes: 7 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await likeMessage('message-1', false)
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/messages/message-1/like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ liked: false }),
+    })
   })
 
   it('sends a server-approved mute duration for one anonymous visitor', async () => {
@@ -42,6 +55,19 @@ describe('message API client', () => {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ duration: '1d' }),
+    })
+  })
+
+  it('restores a logically deleted message', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ ok: true }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await restoreMessage('message-1')
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/admin/messages/message-1', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deleted: false }),
     })
   })
 })

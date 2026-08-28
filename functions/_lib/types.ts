@@ -16,6 +16,7 @@ export interface MessageRow {
   updated_at: string
   ip_hash: string | null
   visitor_id: string | null
+  deleted_at: string | null
 }
 
 export interface AdminMessageRow extends MessageRow {
@@ -45,4 +46,5 @@ export interface AdminMessageDto extends PublicMessageDto {
   visitorId: string | null
   displayName: string
   mutedUntil: string | null
+  deletedAt: string | null
 }

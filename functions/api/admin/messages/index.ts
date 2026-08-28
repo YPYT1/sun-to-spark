@@ -1,4 +1,5 @@
 import { requireAdmin } from '../../../_lib/admin'
+import { getAdminMessageQuery } from '../../../_lib/admin-message-query'
 import { getAdminPagination } from '../../../_lib/admin-pagination'
 import { json, methodNotAllowed } from '../../../_lib/http'
 import { toAdminMessage } from '../../../_lib/message-store'
@@ -9,24 +10,20 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   if (unauthorized) return unauthorized
 
   const url = new URL(request.url)
-  const status = url.searchParams.get('status')
-  const normalizedStatus = status === 'visible' || status === 'hidden' ? status : null
+  const queryPolicy = getAdminMessageQuery(url.searchParams.get('status'), url.searchParams.get('sort'))
   const { page, pageSize, offset } = getAdminPagination(url.searchParams.get('page'))
   const search = (url.searchParams.get('q') ?? '').trim().slice(0, 100)
-  const conditions: string[] = []
+  const conditions: string[] = [queryPolicy.condition]
   const bindings: unknown[] = []
 
-  if (normalizedStatus) {
-    conditions.push('m.status = ?')
-    bindings.push(normalizedStatus)
-  }
+  if (queryPolicy.filter === 'visible' || queryPolicy.filter === 'hidden') bindings.push(queryPolicy.filter)
   if (search) {
     conditions.push(`(m.body LIKE ? ESCAPE '\\' OR COALESCE(v.display_name, '') LIKE ? ESCAPE '\\')`)
     const escaped = search.replace(/[\\%_]/g, '\\$&')
     bindings.push(`%${escaped}%`, `%${escaped}%`)
   }
 
-  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+  const where = `WHERE ${conditions.join(' AND ')}`
   const [countRow, listResult] = await Promise.all([
     env.DB.prepare(`
       SELECT COUNT(*) AS total
@@ -36,12 +33,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     `).bind(...bindings).first<{ total: number }>(),
     env.DB.prepare(`
     SELECT m.id, m.body, m.likes_count, m.status, m.source, m.color_seed,
-           m.created_at, m.updated_at, m.ip_hash, m.visitor_id,
+           m.created_at, m.updated_at, m.ip_hash, m.visitor_id, m.deleted_at,
            v.display_name, v.muted_until
     FROM messages m
     LEFT JOIN visitors v ON v.id = m.visitor_id
     ${where}
-    ORDER BY m.created_at DESC, m.id DESC
+    ORDER BY ${queryPolicy.orderBy}
     LIMIT ? OFFSET ?
   `).bind(...bindings, pageSize, offset).all<AdminMessageRow>(),
   ])
@@ -54,6 +51,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     pageSize,
     total,
     totalPages: Math.ceil(total / pageSize),
+    sort: queryPolicy.sort,
   })
 }
 
