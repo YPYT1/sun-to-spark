@@ -166,6 +166,8 @@ input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; appearanc
 .bill-primary h3 { margin: 0; color: #fff; font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(3.2rem, 7vw, 7rem); font-style: italic; font-weight: 400; letter-spacing: -.06em; line-height: .88; }
 .bill-primary > span { display: block; max-width: 760px; margin-top: 20px; color: rgba(255,255,255,.52); font-size: 14px; font-weight: 300; line-height: 1.55; letter-spacing: .035em; }
 .bill-primary.free h3 { color: var(--signal); text-shadow: 0 0 45px rgba(216,255,102,.12); }
+.bill-primary.free .share-pct { color: var(--signal); font-weight: 500; }
+.share-pct { color: var(--signal); font-weight: 500; }
 .bill-free-breakdown { position: relative; z-index: 5; display: grid; gap: 12px; margin-top: 8px; }
 .bill-free-tier { padding: 18px 0; border-top: 1px solid rgba(255,255,255,.08); text-align: left; }
 .bill-free-tier span { display: block; color: rgba(255,255,255,.42); font-size: 11px; letter-spacing: .08em; }
@@ -226,6 +228,8 @@ input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; appearanc
 .insight-grid strong { display: block; margin-top: 22px; color: var(--signal); font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(3rem, 5vw, 5rem); font-style: italic; font-weight: 400; line-height: .8; }
 .insight-grid strong small { margin-left: 7px; color: rgba(216,255,102,.55); font-family: 'Barlow', sans-serif; font-size: 13px; font-style: normal; font-weight: 400; }
 .insight-grid p { max-width: 290px; margin: 22px 0 0; color: rgba(255,255,255,.56); font-size: 15px; font-weight: 300; line-height: 1.65; }
+.insight-grid p .share-pct { font-family: 'Barlow', sans-serif; font-size: inherit; font-style: normal; font-weight: 500; }
+.bill-free-tier small .share-pct { font-size: inherit; font-style: normal; }
 
 .closing-section { position: relative; display: flex; min-height: 760px; align-items: center; justify-content: center; overflow: hidden; flex-direction: column; padding: 100px 24px; background: radial-gradient(circle at 50% 55%, #1b2112 0, #080a06 28%, #050505 64%); text-align: center; }
 .closing-noise { position: absolute; inset: 0; opacity: .11; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E"); }

@@ -55,19 +55,19 @@ export function ResultSection({ config, result, onApplyPreset, onPoster }: Resul
           <div className="bill-primary free">
             <p>到您 <strong>{config.retireAge}</strong> 岁退休，真正自由支配的时间是</p>
             <motion.h3 key={`pre-free-${granularity}-${result.preRetirementFreeBill.totalHours}`} initial={{ opacity: 0.35, y: 8 }} animate={{ opacity: 1, y: 0 }}>{formatByGranularity(result.preRetirementFreeBill, granularity)}</motion.h3>
-            <span>共 {result.preRetirementFreeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.preRetirementFreePercentage.toFixed(1)}% · 仅统计退休前</span>
+            <span>共 {result.preRetirementFreeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 <strong className="share-pct">{result.preRetirementFreePercentage.toFixed(1)}%</strong> · 仅统计退休前</span>
           </div>
 
           <div className="bill-free-breakdown">
             <article className="bill-free-tier">
               <span>退休后自由</span>
               <strong>{formatByGranularity(result.postRetirementFreeBill, granularity)}</strong>
-              <small>从 {config.retireAge} 岁到预期 {config.lifeExpectancy} 岁 · 共 {result.postRetirementFreeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.postRetirementFreePercentage.toFixed(1)}%</small>
+              <small>从 {config.retireAge} 岁到预期 {config.lifeExpectancy} 岁 · 共 {result.postRetirementFreeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 <strong className="share-pct">{result.postRetirementFreePercentage.toFixed(1)}%</strong></small>
             </article>
             <article className="bill-free-tier total">
               <span>全生命周期自由总计</span>
               <strong>{formatByGranularity(result.freeBill, granularity)}</strong>
-              <small>从现在到预期 {config.lifeExpectancy} 岁 · 共 {result.freeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.freePercentage.toFixed(1)}% · 退休前 + 退休后</small>
+              <small>从现在到预期 {config.lifeExpectancy} 岁 · 共 {result.freeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 <strong className="share-pct">{result.freePercentage.toFixed(1)}%</strong> · 退休前 + 退休后</small>
             </article>
           </div>
 
@@ -80,7 +80,7 @@ export function ResultSection({ config, result, onApplyPreset, onPoster }: Resul
             <div className="composition-legend">
               <span><i className="work" />工作 <b>{result.workPercentage.toFixed(1)}%</b></span>
               <span><i className="maintenance" />生存损耗 <b>{result.maintenancePercentage.toFixed(1)}%</b></span>
-              <span><i className="freedom" />真正自由 <b>{result.freePercentage.toFixed(1)}%</b></span>
+              <span><i className="freedom" />真正自由 <b className="share-pct">{result.freePercentage.toFixed(1)}%</b></span>
             </div>
           </div>
 
@@ -121,7 +121,7 @@ export function ResultSection({ config, result, onApplyPreset, onPoster }: Resul
       <div className="section insight-grid" id="method">
         <article><span>退休前自由</span><strong>{result.preRetirementFreeBill.years}<small>年+</small></strong><p>{formatFull(result.preRetirementFreeBill)}，截至 {config.retireAge} 岁。</p></article>
         <article><span>退休后自由</span><strong>{result.postRetirementFreeBill.years}<small>年+</small></strong><p>{formatFull(result.postRetirementFreeBill)}，{config.retireAge} 岁 → {config.lifeExpectancy} 岁。</p></article>
-        <article><span>自由总计</span><strong>{result.freeBill.years}<small>年+</small></strong><p>{formatFull(result.freeBill)}，占剩余人生 {result.freePercentage.toFixed(1)}%。</p></article>
+        <article><span>自由总计</span><strong>{result.freeBill.years}<small>年+</small></strong><p>{formatFull(result.freeBill)}，占剩余人生 <strong className="share-pct">{result.freePercentage.toFixed(1)}%</strong>。</p></article>
       </div>
     </section>
   )
