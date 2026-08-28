@@ -89,9 +89,12 @@ export function calculateLifeTimeBill(config: LifeConfig): BillResult {
     maintenanceHours,
     workPercentage: percent(workHours),
     freePercentage: percent(freeHours),
+    preRetirementFreePercentage: percent(preRetirementFreeHours),
+    postRetirementFreePercentage: percent(postRetirementFreeHours),
     maintenancePercentage: percent(maintenanceHours),
     workBill: formatTimeUnits(workHours),
     freeBill: formatTimeUnits(freeHours),
+    preRetirementFreeBill: formatTimeUnits(preRetirementFreeHours),
     postRetirementFreeBill: formatTimeUnits(postRetirementFreeHours),
     maintenanceBill: formatTimeUnits(maintenanceHours),
   }

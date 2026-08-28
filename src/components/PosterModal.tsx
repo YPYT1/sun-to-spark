@@ -5,7 +5,7 @@ import { formatFull } from '../lib/algorithm'
 import type { BillResult, LifeConfig } from '../types'
 
 const POSTER_WIDTH = 400
-const POSTER_HEIGHT = 711
+const POSTER_HEIGHT = 820
 
 interface PosterModalProps {
   open: boolean
@@ -22,8 +22,10 @@ function PosterArt({ config, result }: { config: LifeConfig; result: BillResult 
       <p className="poster-kicker">LIFE TIME BILL · PERSONAL ARCHIVE</p>
       <h2>我把多少人生，<br />交给了工作？</h2>
       <div className="poster-rule" />
-      <section><span>工作占用 / WORK</span><strong>{formatFull(result.workBill)}</strong><small>{result.workBill.totalHours.toLocaleString()} 小时</small></section>
-      <section className="poster-free"><span>余生自由 / FREEDOM</span><strong>{formatFull(result.freeBill)}</strong><small>{result.freeBill.totalHours.toLocaleString()} 小时</small></section>
+      <section><span>工作占用 / WORK</span><strong>{formatFull(result.workBill)}</strong><small>{result.workBill.totalHours.toLocaleString()} 小时 · 至 {config.retireAge} 岁</small></section>
+      <section className="poster-free"><span>退休前自由 / BEFORE RETIRE</span><strong>{formatFull(result.preRetirementFreeBill)}</strong><small>{result.preRetirementFreeBill.totalHours.toLocaleString()} 小时 · 至 {config.retireAge} 岁</small></section>
+      <section className="poster-free poster-free-post"><span>退休后自由 / AFTER RETIRE</span><strong>{formatFull(result.postRetirementFreeBill)}</strong><small>{result.postRetirementFreeBill.totalHours.toLocaleString()} 小时 · {config.retireAge} → {config.lifeExpectancy} 岁</small></section>
+      <section className="poster-free poster-free-total"><span>自由总计 / TOTAL FREEDOM</span><strong>{formatFull(result.freeBill)}</strong><small>{result.freeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.freePercentage.toFixed(1)}%</small></section>
       <div className="poster-ratio"><div><span style={{ width: `${result.workPercentage}%` }} /><i style={{ width: `${result.maintenancePercentage}%` }} /><b style={{ width: `${result.freePercentage}%` }} /></div><p>工作 {result.workPercentage.toFixed(1)}% · 生存 {result.maintenancePercentage.toFixed(1)}% · 自由 {result.freePercentage.toFixed(1)}%</p></div>
       <div className="poster-meta"><span>{config.currentAge} 岁 → {config.lifeExpectancy} 岁</span><span>{config.workStart} — {config.workEnd}</span></div>
       <footer><span>时间不是拥有的东西，<br />时间就是你的人生。</span><span className="poster-code">L T B<br />2 0 2 6</span></footer>
@@ -68,7 +70,7 @@ export function PosterModal({ open, onClose, config, result }: PosterModalProps)
       <div className="poster-dialog">
         <div className="poster-toolbar"><span>海报预览 · 9:16</span><button onClick={onClose}><X size={20} /></button></div>
         <div className="poster-scroll">
-          <div className="poster poster-preview">
+          <div className="poster poster-preview poster-preview-tall">
             <PosterArt config={config} result={result} />
           </div>
         </div>
@@ -77,7 +79,7 @@ export function PosterModal({ open, onClose, config, result }: PosterModalProps)
           <button className="copy-poster-link" onClick={copyLink}>{copied ? <Check size={16} /> : <Link2 size={16} />}{copied ? '链接已复制' : '复制账单链接'}</button>
         </div>
       </div>
-      <div className="poster-export-root" aria-hidden="true">
+      <div className="poster-export-root poster-export-root-tall" aria-hidden="true">
         <div className="poster poster-export" ref={posterRef}>
           <PosterArt config={config} result={result} />
         </div>

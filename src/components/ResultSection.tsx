@@ -53,9 +53,22 @@ export function ResultSection({ config, result, onApplyPreset, onPoster }: Resul
           <div className="bill-separator"><span>VS</span></div>
 
           <div className="bill-primary free">
-            <p>从现在到预期 <strong>{config.lifeExpectancy}</strong> 岁，真正自由支配的时间是</p>
-            <motion.h3 key={`free-${granularity}-${result.freeBill.totalHours}`} initial={{ opacity: 0.35, y: 8 }} animate={{ opacity: 1, y: 0 }}>{formatByGranularity(result.freeBill, granularity)}</motion.h3>
-            <span>共 {result.freeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.freePercentage.toFixed(1)}% · 含退休后 {formatFull(result.postRetirementFreeBill)}</span>
+            <p>到您 <strong>{config.retireAge}</strong> 岁退休，真正自由支配的时间是</p>
+            <motion.h3 key={`pre-free-${granularity}-${result.preRetirementFreeBill.totalHours}`} initial={{ opacity: 0.35, y: 8 }} animate={{ opacity: 1, y: 0 }}>{formatByGranularity(result.preRetirementFreeBill, granularity)}</motion.h3>
+            <span>共 {result.preRetirementFreeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.preRetirementFreePercentage.toFixed(1)}% · 仅统计退休前</span>
+          </div>
+
+          <div className="bill-free-breakdown">
+            <article className="bill-free-tier">
+              <span>退休后自由</span>
+              <strong>{formatByGranularity(result.postRetirementFreeBill, granularity)}</strong>
+              <small>从 {config.retireAge} 岁到预期 {config.lifeExpectancy} 岁 · 共 {result.postRetirementFreeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.postRetirementFreePercentage.toFixed(1)}%</small>
+            </article>
+            <article className="bill-free-tier total">
+              <span>全生命周期自由总计</span>
+              <strong>{formatByGranularity(result.freeBill, granularity)}</strong>
+              <small>从现在到预期 {config.lifeExpectancy} 岁 · 共 {result.freeBill.totalHours.toLocaleString()} 小时 · 占剩余人生 {result.freePercentage.toFixed(1)}% · 退休前 + 退休后</small>
+            </article>
           </div>
 
           <div className="time-composition">
@@ -72,13 +85,13 @@ export function ResultSection({ config, result, onApplyPreset, onPoster }: Resul
           </div>
 
           <p className="bill-footnote">
-            分母是「现在 → 预期寿命」的全部剩余人生；工作按在岗跨度计入（含午休）；自由 = 退休前空闲 + 退休后扣睡眠/杂务后的时间。
+            分母是「现在 → 预期寿命」的全部剩余人生；工作按在岗跨度计入（含午休）；退休前自由不含退休后时段；全生命周期自由 = 退休前 + 退休后。
           </p>
 
           <details className="insight-fold">
             <summary>
               <span>具象化感受</span>
-              <small>把小时换成电影、周末与睡眠</small>
+              <small>分别感受退休前、退休后与全生命周期自由</small>
             </summary>
             <div className="insight-lines">
               {insights.map((line) => (
@@ -106,9 +119,9 @@ export function ResultSection({ config, result, onApplyPreset, onPoster }: Resul
       </div>
 
       <div className="section insight-grid" id="method">
-        <article><span>每年出勤</span><strong>{Math.round(result.annualWorkDays)}<small>天</small></strong><p>已扣除周休、法定假期与年假。</p></article>
-        <article><span>每日工作占用</span><strong>{result.dailySpanHours.toFixed(1)}<small>小时</small></strong><p>从上班到下班，包含工作日内的休息时间。</p></article>
-        <article><span>退休后自由</span><strong>{result.postRetirementFreeBill.years}<small>年+</small></strong><p>{formatFull(result.postRetirementFreeBill)}，已扣除睡眠与日常杂务。</p></article>
+        <article><span>退休前自由</span><strong>{result.preRetirementFreeBill.years}<small>年+</small></strong><p>{formatFull(result.preRetirementFreeBill)}，截至 {config.retireAge} 岁。</p></article>
+        <article><span>退休后自由</span><strong>{result.postRetirementFreeBill.years}<small>年+</small></strong><p>{formatFull(result.postRetirementFreeBill)}，{config.retireAge} 岁 → {config.lifeExpectancy} 岁。</p></article>
+        <article><span>自由总计</span><strong>{result.freeBill.years}<small>年+</small></strong><p>{formatFull(result.freeBill)}，占剩余人生 {result.freePercentage.toFixed(1)}%。</p></article>
       </div>
     </section>
   )

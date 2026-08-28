@@ -7,9 +7,11 @@ describe('insights', () => {
   it('builds concrete metaphors from bill hours', () => {
     const result = calculateLifeTimeBill(DEFAULT_CONFIG)
     const lines = buildInsights(result)
-    expect(lines).toHaveLength(3)
+    expect(lines.length).toBeGreaterThanOrEqual(7)
     expect(lines[0]?.value).toMatch(/电影/)
-    expect(lines[1]?.value).toMatch(/周末/)
+    expect(lines.some((line) => line.label.includes('退休前'))).toBe(true)
+    expect(lines.some((line) => line.label.includes('退休后'))).toBe(true)
+    expect(lines.some((line) => line.label.includes('全生命周期'))).toBe(true)
   })
 
   it('describes work percentage deltas', () => {

@@ -46,9 +46,12 @@ export interface BillResult {
   maintenanceHours: number
   workPercentage: number
   freePercentage: number
+  preRetirementFreePercentage: number
+  postRetirementFreePercentage: number
   maintenancePercentage: number
   workBill: TimeUnits
   freeBill: TimeUnits
+  preRetirementFreeBill: TimeUnits
   postRetirementFreeBill: TimeUnits
   maintenanceBill: TimeUnits
 }

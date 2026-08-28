@@ -47,6 +47,7 @@ describe('life time bill', () => {
     expect(result.workHours).toBeCloseTo(41 * result.annualWorkDays * 10, 2)
     expect(result.postRetirementFreeHours).toBeCloseTo(10 * 365.2425 * 15, 2)
     expect(result.freeHours).toBeCloseTo(result.preRetirementFreeHours + result.postRetirementFreeHours, 2)
+    expect(result.preRetirementFreeBill.totalHours).toBe(Math.round(result.preRetirementFreeHours))
     expect(result.workPercentage + result.maintenancePercentage + result.freePercentage).toBeCloseTo(100, 8)
   })
 
