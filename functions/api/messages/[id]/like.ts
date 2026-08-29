@@ -1,8 +1,8 @@
 import { json, methodNotAllowed, readJson } from '../../../_lib/http'
 import { normalizeLikeRequest } from '../../../_lib/like-policy'
-import { hashClientIp, hashIdentifier } from '../../../_lib/security'
+import { hashClientIp, hashIdentifier, readCookie, verifyVisitorToken } from '../../../_lib/security'
 import type { Env } from '../../../_lib/types'
-import { ensureVisitor } from '../../../_lib/visitor-store'
+import { ensureVisitor, VISITOR_COOKIE } from '../../../_lib/visitor-store'
 
 function responseHeaders(setCookie: string | null): HeadersInit {
   return setCookie ? { 'Set-Cookie': setCookie } : {}
@@ -17,9 +17,11 @@ export const onRequestPost: PagesFunction<Env, 'id'> = async ({ request, env, pa
   const ip = request.headers.get('CF-Connecting-IP')
     ?? request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim()
     ?? 'unknown'
-  const [voterHash, legacyIpHash] = await Promise.all([
+  const previousVisitorId = await verifyVisitorToken(readCookie(request, VISITOR_COOKIE), env.MESSAGE_SESSION_SECRET)
+  const [voterHash, legacyIpHash, previousVisitorHash] = await Promise.all([
     hashIdentifier(`visitor:${identity.visitor.id}`, env.MESSAGE_IP_HASH_SALT),
     hashClientIp(ip, env.MESSAGE_IP_HASH_SALT),
+    previousVisitorId ? hashIdentifier(`visitor:${previousVisitorId}`, env.MESSAGE_IP_HASH_SALT) : Promise.resolve(null),
   ])
 
   const mutation = desired.liked
@@ -30,7 +32,7 @@ export const onRequestPost: PagesFunction<Env, 'id'> = async ({ request, env, pa
           SELECT 1 FROM messages WHERE id = ? AND status = 'visible' AND deleted_at IS NULL
         )
       `).bind(params.id, voterHash, params.id)]
-    : (voterHash === legacyIpHash ? [voterHash] : [voterHash, legacyIpHash]).map((key) => env.DB.prepare(`
+    : [...new Set([voterHash, legacyIpHash, previousVisitorHash].filter((key): key is string => Boolean(key)))].map((key) => env.DB.prepare(`
         DELETE FROM message_likes
         WHERE message_id = ? AND voter_hash = ?
           AND EXISTS (

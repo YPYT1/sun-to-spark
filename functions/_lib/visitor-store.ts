@@ -25,25 +25,22 @@ async function findVisitor(env: Env, id: string): Promise<VisitorRow | null> {
   `).bind(id).first<VisitorRow>()
 }
 
-async function createOrFindVisitor(env: Env, id: string): Promise<VisitorRow | null> {
+async function createOrFindVisitor(env: Env, id: string, previous?: VisitorRow | null): Promise<VisitorRow | null> {
   await env.DB.prepare(`
-    INSERT OR IGNORE INTO visitors (id, display_name) VALUES (?, ?)
-  `).bind(id, generateVisitorDisplayName()).run()
+    INSERT OR IGNORE INTO visitors (id, display_name, muted_until) VALUES (?, ?, ?)
+  `).bind(id, previous?.display_name ?? generateVisitorDisplayName(), previous?.muted_until ?? null).run()
   return findVisitor(env, id)
 }
 
 export async function ensureVisitor(request: Request, env: Env): Promise<{ visitor: VisitorRow; setCookie: string | null }> {
   const existingId = await verifyVisitorToken(readCookie(request, VISITOR_COOKIE), env.MESSAGE_SESSION_SECRET)
-  if (existingId) {
-    const existing = await findVisitor(env, existingId)
-    if (existing) return { visitor: existing, setCookie: null }
-  }
+  const existing = existingId ? await findVisitor(env, existingId) : null
 
   const browserKey = request.headers.get(VISITOR_KEY_HEADER)
   if (browserKey && VISITOR_KEY_PATTERN.test(browserKey)) {
     const hash = await hashIdentifier(`browser:${browserKey.toLowerCase()}`, env.MESSAGE_SESSION_SECRET)
     const id = `browser-${hash.slice(0, 32)}`
-    const visitor = await createOrFindVisitor(env, id)
+    const visitor = await createOrFindVisitor(env, id, existing)
     if (visitor) {
       const token = await createVisitorToken(id, env.MESSAGE_SESSION_SECRET)
       return {
@@ -52,6 +49,8 @@ export async function ensureVisitor(request: Request, env: Env): Promise<{ visit
       }
     }
   }
+
+  if (existing) return { visitor: existing, setCookie: null }
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const id = crypto.randomUUID()
