@@ -1,6 +1,7 @@
 import { ChevronDown, History, RotateCcw } from 'lucide-react'
 import { motion } from 'motion/react'
 import { HOLIDAYS } from '../lib/constants'
+import { resetLiquidPointer, trackLiquidPointer } from '../lib/liquid-pointer'
 import type { HolidayKey, LifeConfig } from '../types'
 
 interface ControlSectionProps {
@@ -95,7 +96,7 @@ export function ControlSection({ config, onChange, onHolidayChange, onReset, onR
           </motion.div>
         )}
 
-        <details className="advanced">
+        <details className="advanced liquid-follow" onPointerMove={trackLiquidPointer} onPointerLeave={resetLiquidPointer}>
           <summary><span><b>生存必要损耗</b><small>睡眠、通勤与日常杂务</small></span><ChevronDown size={18} /></summary>
           <div className="field-grid three advanced-fields">
             <RangeField label="每日睡眠" value={config.sleepHours} min={4} max={12} step={0.5} suffix="小时" onChange={(sleepHours) => onChange({ sleepHours })} />

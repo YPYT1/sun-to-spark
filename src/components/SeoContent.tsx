@@ -13,7 +13,7 @@ export const FAQ_ITEMS = [
   },
   {
     question: '可以对比 996、单休和双休吗？',
-    answer: '可以。网站提供 996 打工人、大小休打工人、标准打工人、双休、三休、北漂通勤和自由职业等场景，可以在同一人生坐标下对比工作占比。',
+    answer: '可以。网站提供 996 打工人、大小休打工人、标准打工人、体制内 / 外企、北欧福利、北漂通勤党和顶级牛马等场景，可以在同一人生坐标下对比工作占比。',
   },
   {
     question: '账单数据和留言保存在哪里？',
@@ -23,7 +23,7 @@ export const FAQ_ITEMS = [
 
 export function SeoContent() {
   return (
-    <section className="seo-section section" id="faq" aria-labelledby="seo-title">
+    <section className="seo-section section" id="method" aria-labelledby="seo-title">
       <header className="seo-heading">
         <span className="section-badge liquid-glass">计算说明</span>
         <div>
@@ -50,7 +50,7 @@ export function SeoContent() {
         </article>
       </div>
 
-      <div className="seo-faq">
+      <div className="seo-faq" id="faq">
         <span className="seo-faq-label">常见问题 / FAQ</span>
         {FAQ_ITEMS.map((item) => (
           <details key={item.question}>

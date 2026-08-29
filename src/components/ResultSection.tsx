@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { useState } from 'react'
 import { formatFull } from '../lib/algorithm'
 import { buildInsights } from '../lib/insights'
+import { resetLiquidPointer, trackLiquidPointer } from '../lib/liquid-pointer'
 import { CompareStrip } from './CompareStrip'
 import type { BillResult, LifeConfig, TimeUnits } from '../types'
 
@@ -87,7 +88,7 @@ export function ResultSection({ config, result, onPoster }: ResultSectionProps) 
             分母是「现在 → 预期寿命」的全部剩余人生；工作按在岗跨度计入（含午休）；退休前自由不含退休后时段；全生命周期自由 = 退休前 + 退休后。
           </p>
 
-          <details className="insight-fold">
+          <details className="insight-fold liquid-follow" onPointerMove={trackLiquidPointer} onPointerLeave={resetLiquidPointer}>
             <summary>
               <span>具象化感受</span>
               <small>分别感受退休前、退休后与全生命周期自由</small>
@@ -117,7 +118,7 @@ export function ResultSection({ config, result, onPoster }: ResultSectionProps) 
         <CompareStrip config={config} result={result} />
       </div>
 
-      <div className="section insight-grid" id="method">
+      <div className="section insight-grid">
         <article><span>退休前自由</span><strong>{result.preRetirementFreeBill.years}<small>年+</small></strong><p>{formatFull(result.preRetirementFreeBill)}，截至 {config.retireAge} 岁。</p></article>
         <article><span>退休后自由</span><strong>{result.postRetirementFreeBill.years}<small>年+</small></strong><p>{formatFull(result.postRetirementFreeBill)}，{config.retireAge} 岁 → {config.lifeExpectancy} 岁。</p></article>
         <article><span>自由总计</span><strong>{result.freeBill.years}<small>年+</small></strong><p>{formatFull(result.freeBill)}，占剩余人生 <strong className="share-pct">{result.freePercentage.toFixed(1)}%</strong>。</p></article>

@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { fetchAdminMessages, fetchMessages, likeMessage, muteVisitor, restoreMessage } from '../src/lib/message-api'
+import { fetchAdminMessages, fetchMessages, likeMessage, muteVisitor, postMessage, restoreMessage } from '../src/lib/message-api'
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
 
 describe('message API client', () => {
   it('rejects an HTML SPA fallback instead of returning undefined messages', async () => {
@@ -38,11 +41,37 @@ describe('message API client', () => {
 
     await likeMessage('message-1', false)
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/messages/message-1/like', {
+    expect(fetchMock).toHaveBeenCalledWith('/api/messages/message-1/like', expect.objectContaining({
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ liked: false }),
-    })
+    }))
+    expect(new Headers(fetchMock.mock.calls[0]![1]?.headers).get('Content-Type')).toBe('application/json')
+  })
+
+  it('retries a public request after a connection-level failure', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi.fn()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(Response.json({ messages: [] }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const resultPromise = fetchMessages()
+    await vi.runAllTimersAsync()
+
+    await expect(resultPromise).resolves.toEqual([])
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(String(fetchMock.mock.calls[1]![0])).toBe('https://484b0cc2.sun-to-spark.pages.dev/api/messages?limit=60')
+  })
+
+  it('sends a stable request id so a retried comment cannot be inserted twice', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ message: { id: 'request-1' } }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await postMessage('留言', 'd6d37b1b-043e-4b3c-9cb4-45e981a82782')
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/messages', expect.objectContaining({
+      body: JSON.stringify({ body: '留言', requestId: 'd6d37b1b-043e-4b3c-9cb4-45e981a82782' }),
+    }))
   })
 
   it('sends a server-approved mute duration for one anonymous visitor', async () => {

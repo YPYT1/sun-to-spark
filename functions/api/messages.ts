@@ -1,5 +1,5 @@
 import { json, methodNotAllowed, readJson } from '../_lib/http'
-import { evaluatePostingPolicy, validateMessageBody } from '../_lib/message-policy'
+import { evaluatePostingPolicy, normalizeMessageRequestId, validateMessageBody } from '../_lib/message-policy'
 import { toPublicMessage } from '../_lib/message-store'
 import { hashClientIp } from '../_lib/security'
 import { ensureVisitor } from '../_lib/visitor-store'
@@ -29,6 +29,22 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!validation.ok) return json({ error: validation.error }, { status: 400 })
 
   const identity = await ensureVisitor(request, env)
+  const requestedId = normalizeMessageRequestId(payload?.requestId)
+  if (requestedId) {
+    const existing = await env.DB.prepare(`
+      SELECT id, body, likes_count, status, source, color_seed, created_at, updated_at, ip_hash, visitor_id, deleted_at
+      FROM messages WHERE id = ?
+    `).bind(requestedId).first<MessageRow>()
+    if (existing) {
+      if (existing.body !== validation.body) {
+        return json({ error: '留言请求标识冲突' }, { status: 409 })
+      }
+      return json(
+        { message: toPublicMessage(existing) },
+        { headers: identity.setCookie ? { 'Set-Cookie': identity.setCookie } : {} },
+      )
+    }
+  }
   const mute = evaluateMute(identity.visitor.muted_until)
   if (mute.muted) {
     return json(
@@ -40,7 +56,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const ip = request.headers.get('CF-Connecting-IP')
     ?? request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim()
     ?? 'unknown'
-  const id = crypto.randomUUID()
+  const id = requestedId ?? crypto.randomUUID()
   const ipHash = await hashClientIp(ip, env.MESSAGE_IP_HASH_SALT)
   const [counts, duplicate] = await Promise.all([
     env.DB.prepare(`

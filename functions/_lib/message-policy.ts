@@ -12,6 +12,12 @@ export function validateMessageBody(input: unknown): MessageValidation {
   return { ok: true, body }
 }
 
+const REQUEST_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+export function normalizeMessageRequestId(input: unknown): string | null {
+  return typeof input === 'string' && REQUEST_ID_PATTERN.test(input) ? input.toLowerCase() : null
+}
+
 interface PostingCounters {
   recentCount: number
   dailyCount: number

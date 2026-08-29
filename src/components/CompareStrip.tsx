@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { calculateLifeTimeBill } from '../lib/algorithm'
+import { matchCompareTier } from '../lib/compare'
 import { describeDelta, workShareColor } from '../lib/insights'
 import { COMPARE_PRESETS } from '../lib/constants'
 import type { BillResult, LifeConfig } from '../types'
@@ -23,14 +24,9 @@ export function CompareStrip({ config, result }: CompareStripProps) {
       })
       .sort((a, b) => b.workPercentage - a.workPercentage)
 
-    const currentTier = rankedRows.reduce((closest, row) => (
-      Math.abs(row.workPercentage - result.workPercentage)
-        < Math.abs(closest.workPercentage - result.workPercentage)
-        ? row
-        : closest
-    ))
+    const currentTier = matchCompareTier(config)
 
-    return rankedRows.map((row) => ({ ...row, isCurrent: row.name === currentTier.name }))
+    return rankedRows.map((row) => ({ ...row, isCurrent: row.name === currentTier }))
   }, [config, result])
 
   return (

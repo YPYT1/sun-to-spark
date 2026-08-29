@@ -4,8 +4,39 @@ interface ApiError {
   error?: string
 }
 
-async function requestJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
-  const response = await fetch(input, init)
+const VISITOR_KEY_STORAGE = 'life-time-bill-message-visitor-key'
+const VISITOR_KEY_HEADER = 'X-Message-Visitor-Key'
+const PUBLIC_API_FALLBACK_ORIGIN = 'https://484b0cc2.sun-to-spark.pages.dev'
+
+export class MessageNetworkError extends Error {
+  readonly retryable = true
+}
+
+export function isMessageNetworkError(error: unknown): error is MessageNetworkError {
+  return error instanceof MessageNetworkError
+}
+
+function getVisitorKey(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const existing = window.localStorage.getItem(VISITOR_KEY_STORAGE)
+    if (existing) return existing
+    const created = crypto.randomUUID()
+    window.localStorage.setItem(VISITOR_KEY_STORAGE, created)
+    return created
+  } catch {
+    return null
+  }
+}
+
+function publicRequest(init?: RequestInit): RequestInit {
+  const headers = new Headers(init?.headers)
+  const visitorKey = getVisitorKey()
+  if (visitorKey) headers.set(VISITOR_KEY_HEADER, visitorKey)
+  return { ...init, headers }
+}
+
+async function readResponse<T>(response: Response): Promise<T> {
   let payload: T & ApiError
   try {
     payload = await response.json() as T & ApiError
@@ -16,27 +47,54 @@ async function requestJson<T>(input: RequestInfo | URL, init?: RequestInit): Pro
   return payload
 }
 
+async function requestJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
+  return readResponse<T>(await fetch(input, init))
+}
+
+async function requestPublicJson<T>(path: string, init?: RequestInit): Promise<T> {
+  let lastError: unknown
+  for (const input of [path, new URL(path, PUBLIC_API_FALLBACK_ORIGIN)]) {
+    const controller = new AbortController()
+    const timeout = globalThis.setTimeout(() => controller.abort(), 5_000)
+    let response: Response
+    try {
+      response = await fetch(input, { ...init, signal: controller.signal, credentials: 'include' })
+    } catch (error) {
+      lastError = error
+      continue
+    } finally {
+      globalThis.clearTimeout(timeout)
+    }
+    if ([502, 503, 504].includes(response.status)) {
+      lastError = new Error(`HTTP ${response.status}`)
+      continue
+    }
+    return readResponse<T>(response)
+  }
+  throw new MessageNetworkError('网络连接不稳定，请检查网络后重试', { cause: lastError })
+}
+
 export async function fetchMessages(limit = 60): Promise<PublicMessage[]> {
-  const payload = await requestJson<{ messages: PublicMessage[] }>(`/api/messages?limit=${limit}`)
+  const payload = await requestPublicJson<{ messages: PublicMessage[] }>(`/api/messages?limit=${limit}`, publicRequest())
   if (!Array.isArray(payload.messages)) throw new Error('留言接口返回了无效数据')
   return payload.messages
 }
 
-export async function postMessage(body: string): Promise<PublicMessage> {
-  const payload = await requestJson<{ message: PublicMessage }>('/api/messages', {
+export async function postMessage(body: string, requestId: string = crypto.randomUUID()): Promise<PublicMessage> {
+  const payload = await requestPublicJson<{ message: PublicMessage }>('/api/messages', publicRequest({
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ body }),
-  })
+    body: JSON.stringify({ body, requestId }),
+  }))
   return payload.message
 }
 
 export async function likeMessage(id: string, liked: boolean): Promise<{ liked: boolean; likes: number }> {
-  return requestJson<{ liked: boolean; likes: number }>(`/api/messages/${encodeURIComponent(id)}/like`, {
+  return requestPublicJson<{ liked: boolean; likes: number }>(`/api/messages/${encodeURIComponent(id)}/like`, publicRequest({
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ liked }),
-  })
+  }))
 }
 
 export interface AdminMessagePage {

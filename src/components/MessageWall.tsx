@@ -1,6 +1,13 @@
 import { ChevronDown, Heart, Pause, Play, Send } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
-import { fetchMessages, likeMessage, postMessage } from '../lib/message-api'
+import { fetchMessages, isMessageNetworkError, likeMessage, postMessage } from '../lib/message-api'
+import {
+  OFFLINE_MESSAGES,
+  readMessageCache,
+  readMessageOutbox,
+  writeMessageCache,
+  writeMessageOutbox,
+} from '../lib/message-offline'
 import {
   assignPaletteIndices,
   countCharacters,
@@ -91,7 +98,7 @@ export function MessageWall() {
   const [likedIds, setLikedIds] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(window.localStorage.getItem('life-time-bill-liked-messages') ?? '[]')) } catch { return new Set() }
   })
-  const [likingId, setLikingId] = useState<string | null>(null)
+  const [likingIds, setLikingIds] = useState<Set<string>>(() => new Set())
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [manualPaused, setManualPaused] = useState(false)
   const [keyboardPaused, setKeyboardPaused] = useState(false)
@@ -103,19 +110,57 @@ export function MessageWall() {
   const columnCount = useColumnCount()
   const length = countCharacters(body)
 
+  const addMessage = useCallback((created: PublicMessage) => {
+    setMessages((current) => [created, ...current.filter((item) => item.id !== created.id)].slice(0, 60))
+  }, [])
+
+  const flushOutbox = useCallback(async () => {
+    const pending = readMessageOutbox()
+    if (!pending.length || !navigator.onLine) return
+    const remaining = [...pending]
+    let delivered = 0
+    for (const item of pending) {
+      try {
+        const created = await postMessage(item.body, item.requestId)
+        addMessage(created)
+        remaining.shift()
+        writeMessageOutbox(remaining)
+        delivered += 1
+      } catch {
+        break
+      }
+    }
+    if (delivered > 0) setNotice(delivered === 1 ? '网络已恢复，暂存的留言已发送' : `网络已恢复，${delivered} 条暂存留言已发送`)
+  }, [addMessage])
+
   const load = useCallback(async (quiet = false) => {
     try {
       const next = await fetchMessages()
       setMessages(Array.isArray(next) ? next : [])
+      writeMessageCache(next)
       if (!quiet) setNotice('')
     } catch (error) {
-      if (!quiet) setNotice(error instanceof Error ? error.message : '留言加载失败')
+      if (!quiet) {
+        const cached = readMessageCache()
+        setMessages((current) => current.length ? current : cached.length ? cached : OFFLINE_MESSAGES)
+        setNotice('网络不稳定，正在显示离线留言；发送内容会自动重试')
+      }
     } finally {
       if (!quiet) setLoading(false)
     }
   }, [])
 
   useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    const retry = () => { void flushOutbox() }
+    window.addEventListener('online', retry)
+    const timer = window.setInterval(retry, 20_000)
+    void flushOutbox()
+    return () => {
+      window.removeEventListener('online', retry)
+      window.clearInterval(timer)
+    }
+  }, [flushOutbox])
   useEffect(() => {
     const timer = window.setInterval(() => {
       if (!document.hidden) void load(true)
@@ -145,22 +190,30 @@ export function MessageWall() {
     if (countCharacters(normalized) > 200) return setNotice('留言最多 200 字')
     setSubmitting(true)
     setNotice('')
+    const requestId = crypto.randomUUID()
     try {
-      const created = await postMessage(normalized)
-      setMessages((current) => [created, ...current.filter((item) => item.id !== created.id)].slice(0, 60))
+      const created = await postMessage(normalized, requestId)
+      addMessage(created)
       setBody('')
       setNotice('这句话已经留在这里了')
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : '提交失败，请稍后再试')
+      if (isMessageNetworkError(error)) {
+        const pending = readMessageOutbox()
+        if (!pending.some((item) => item.requestId === requestId)) writeMessageOutbox([...pending, { requestId, body: normalized }])
+        setBody('')
+        setNotice('网络不稳定，这句话已暂存，恢复后会自动发送')
+      } else {
+        setNotice(error instanceof Error ? error.message : '提交失败，请稍后再试')
+      }
     } finally {
       setSubmitting(false)
     }
   }
 
   const like = async (id: string) => {
-    if (likingId) return
+    if (likingIds.has(id)) return
     const desired = !likedIds.has(id)
-    setLikingId(id)
+    setLikingIds((current) => new Set(current).add(id))
     try {
       const result = await likeMessage(id, desired)
       setMessages((current) => current.map((item) => item.id === id ? { ...item, likes: result.likes } : item))
@@ -171,10 +224,14 @@ export function MessageWall() {
         window.localStorage.setItem('life-time-bill-liked-messages', JSON.stringify([...next]))
         return next
       })
-    } catch {
-      setNotice('点赞失败，请稍后再试')
+    } catch (error) {
+      setNotice(isMessageNetworkError(error) ? '网络连接不稳定，点赞未保存' : '点赞失败，请稍后再试')
     } finally {
-      setLikingId(null)
+      setLikingIds((current) => {
+        const next = new Set(current)
+        next.delete(id)
+        return next
+      })
     }
   }
 
@@ -221,7 +278,7 @@ export function MessageWall() {
             <div className={`message-column direction-${columnIndex === 1 ? 'down' : 'up'}`} key={columnIndex}>
               <div className="message-track" style={{ '--track-duration': `${[52, 64, 57][columnIndex] ?? 52}s` } as CSSProperties}>
                 {[0, 1].map((copy) => (
-                  <div className="message-track-group" aria-hidden={copy === 1} key={copy}>
+                  <div className="message-track-group" data-loop-copy={copy} key={copy}>
                     {column.map((message) => (
                       <LiquidMessageCard
                         message={message}
@@ -229,7 +286,7 @@ export function MessageWall() {
                         expanded={expandedId === message.id}
                         onToggle={() => setExpandedId((current) => current === message.id ? null : message.id)}
                         liked={likedIds.has(message.id)}
-                        liking={likingId === message.id}
+                        liking={likingIds.has(message.id)}
                         onLike={() => void like(message.id)}
                         key={`${copy}-${message.id}`}
                       />

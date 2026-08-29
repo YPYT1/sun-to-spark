@@ -54,13 +54,13 @@ export const PRESETS: Array<{ name: string; note: string; values: Partial<LifeCo
   },
   {
     name: '北欧福利',
-    note: '三休 · 09:00—16:00',
-    values: { retireAge: 60, workStart: '09:00', workEnd: '16:00', breakHours: 1, weekendType: 'TRIPLE', annualLeave: 20 },
+    note: '三休 · 10:00—17:00',
+    values: { retireAge: 60, workStart: '10:00', workEnd: '17:00', breakHours: 1, weekendType: 'TRIPLE', annualLeave: 20 },
   },
   {
-    name: '自由职业',
+    name: '顶级牛马',
     note: '无休 · 09:00—21:00',
-    values: { retireAge: 55, workStart: '09:00', workEnd: '21:00', breakHours: 2, weekendType: 'NONE', annualLeave: 0 },
+    values: { retireAge: 65, workStart: '09:00', workEnd: '21:00', breakHours: 2, weekendType: 'NONE', annualLeave: 0 },
   },
 ]
 
@@ -69,17 +69,12 @@ export const COMPARE_PRESETS: Array<{ name: string; note: string; values: Partia
   ...PRESETS,
   {
     name: '标准打工人',
-    note: '双休 · 09:00—21:00',
-    values: { retireAge: 65, workStart: '09:00', workEnd: '21:00', breakHours: 1.5, weekendType: 'DOUBLE', annualLeave: 5 },
+    note: '双休 · 09:00—18:00',
+    values: { retireAge: 65, workStart: '09:00', workEnd: '18:00', breakHours: 1, weekendType: 'DOUBLE', annualLeave: 5 },
   },
   {
     name: '北漂通勤党',
-    note: '大小休 · 09:00—19:00 · 通勤 3h',
-    values: { retireAge: 65, workStart: '09:00', workEnd: '19:00', breakHours: 2, weekendType: 'BIG_SMALL', annualLeave: 5, commuteHours: 3 },
-  },
-  {
-    name: '准退休作息',
-    note: '双休 · 10:00—16:00 · 55 岁退',
-    values: { retireAge: 55, workStart: '10:00', workEnd: '16:00', breakHours: 1, weekendType: 'DOUBLE', annualLeave: 15 },
+    note: '大小休 · 09:00—19:00 · 通勤 3.5h',
+    values: { retireAge: 65, workStart: '09:00', workEnd: '19:00', breakHours: 2, weekendType: 'BIG_SMALL', annualLeave: 5, commuteHours: 3.5 },
   },
 ]

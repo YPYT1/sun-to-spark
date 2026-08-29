@@ -9,6 +9,7 @@ import {
 } from '../functions/_lib/security'
 import {
   evaluatePostingPolicy,
+  normalizeMessageRequestId,
   validateMessageBody,
 } from '../functions/_lib/message-policy'
 import { normalizeLikeRequest } from '../functions/_lib/like-policy'
@@ -17,12 +18,19 @@ import {
   evaluateMute,
   normalizeMuteRequest,
 } from '../functions/_lib/visitor'
+import { applyPublicCors, publicCorsPreflight } from '../functions/_lib/cors'
 
 describe('message server policy', () => {
   it('accepts 1–200 Unicode characters and rejects larger input', () => {
     expect(validateMessageBody('  今天准时下班。  ')).toEqual({ ok: true, body: '今天准时下班。' })
     expect(validateMessageBody('')).toEqual({ ok: false, error: '留言不能为空' })
     expect(validateMessageBody('界'.repeat(201))).toEqual({ ok: false, error: '留言最多 200 字' })
+  })
+
+  it('accepts only UUID comment request ids for idempotent retries', () => {
+    expect(normalizeMessageRequestId('d6d37b1b-043e-4b3c-9cb4-45e981a82782')).toBe('d6d37b1b-043e-4b3c-9cb4-45e981a82782')
+    expect(normalizeMessageRequestId('seed-01')).toBeNull()
+    expect(normalizeMessageRequestId(null)).toBeNull()
   })
 
   it('enforces recent, daily, and duplicate limits', () => {
@@ -81,5 +89,25 @@ describe('message server policy', () => {
     expect(normalizeLikeRequest({ liked: true })).toEqual({ ok: true, liked: true })
     expect(normalizeLikeRequest({ liked: false })).toEqual({ ok: true, liked: false })
     expect(normalizeLikeRequest({})).toEqual({ ok: false, error: '无效的点赞状态' })
+  })
+
+  it('allows the production page to use a deployment URL as an API fallback', () => {
+    const request = new Request('https://deployment.pages.dev/api/messages', {
+      headers: { Origin: 'https://sun-to-spark.pages.dev' },
+    })
+    const response = applyPublicCors(request, Response.json({ ok: true }))
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://sun-to-spark.pages.dev')
+    expect(response.headers.get('Access-Control-Allow-Headers')).toContain('X-Message-Visitor-Key')
+
+    const preflight = publicCorsPreflight(new Request(request.url, {
+      method: 'OPTIONS',
+      headers: { Origin: 'https://sun-to-spark.pages.dev' },
+    }))
+    expect(preflight?.status).toBe(204)
+
+    const adminResponse = applyPublicCors(new Request('https://deployment.pages.dev/api/admin/messages', {
+      headers: { Origin: 'https://sun-to-spark.pages.dev' },
+    }), Response.json({ ok: true }))
+    expect(adminResponse.headers.get('Access-Control-Allow-Origin')).toBeNull()
   })
 })
